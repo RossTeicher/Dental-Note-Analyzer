@@ -1,3 +1,4 @@
+
 import streamlit as st
 from openai import OpenAI
 import os
@@ -23,7 +24,7 @@ Upload the day's dental data:
 
 procedure_codes = st.text_area("Enter procedure codes or summary", "D1110, D4341")
 
-perio_chart_file = st.file_uploader("Upload Perio Chart (Image or PDF)", type=["png", "jpg", "jpeg", "pdf"])
+perio_chart_file = st.file_uploader("Upload Perio Chart (PDF or Image)", type=["png", "jpg", "jpeg", "pdf"])
 radiograph_file = st.file_uploader("Upload Radiograph (optional)", type=["png", "jpg", "jpeg"])
 
 def extract_text_from_file(uploaded_file):
@@ -63,36 +64,23 @@ if generate_button and procedure_codes and perio_chart_file:
             perio_text = extract_text_from_file(perio_chart_file)
             radiograph_summary = extract_radiograph_summary(radiograph_file)
 
-            messages = [
-                {"role": "system", "content": "You are an expert dental AI assistant trained to provide in-depth diagnostic assessments and treatment planning."},
-                {"role": "user", "content": f"Procedure codes performed today: {procedure_codes}"},
-                {"role": "user", "content": f"Periodontal chart data: {perio_text}"},
-                {"role": "user", "content": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each. The treatment options should cover general, cosmetic, surgical, and prosthetic possibilities — including implants, veneers, crowns, bridges, scaling and root planing, or extraction when appropriate.\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing\n8. A take-home patient warning sheet summarizing risks of no treatment and encouraging follow-up care written in strong, urgent language to emphasize potential consequences and improve case acceptance"}
-            ]
-
             response = client.chat.completions.create(
                 model="gpt-4o",
-                messages=messages
+                messages=[
+                    {"role": "system", "content": "You are an expert dental AI assistant trained to provide in-depth diagnostic assessments and treatment planning."},
+                    {"role": "user", "content": [
+                        {"type": "text", "text": f"Procedure codes performed today: {procedure_codes}"},
+                        {"type": "text", "text": f"Periodontal chart data: {perio_text}"},
+                        radiograph_summary,
+                        {"type": "text", "text": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing\n8. A take-home patient warning sheet summarizing risks of no treatment and encouraging follow-up care"}
+                    ]}
+                ]
             )
 
             output = response.choices[0].message.content
 
             st.subheader("AI-Generated Note, Diagnosis & Plans")
             st.text_area("Output", output, height=500)
-
-            if output:
-                from fpdf import FPDF
-                pdf = FPDF()
-                pdf.add_page()
-                pdf.set_auto_page_break(auto=True, margin=15)
-                pdf.set_font("Arial", size=12)
-                for line in output.split("\n"):
-                    if line.strip():
-                        pdf.multi_cell(0, 10, line)
-                pdf_file_path = os.path.join(tempfile.gettempdir(), "patient_output.pdf")
-                pdf.output(pdf_file_path)
-                with open(pdf_file_path, "rb") as f:
-                    st.download_button(label="📄 Download PDF for Patient", data=f, file_name="patient_output.pdf", mime="application/pdf")
 
         except OpenAIError as e:
             st.error(f"OpenAI API error: {e}")
