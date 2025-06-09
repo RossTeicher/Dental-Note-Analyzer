@@ -1,7 +1,7 @@
-# Final Dental Note Generator
+# AI Dental Note Generator
 
 Includes:
-- Syntax fixed
-- PDF generation
-- Risk warnings
-- Vision-based analysis
+- GPT-4o in-depth note generation
+- Radiograph and Perio Chart parsing
+- Patient warning PDF export
+- Risk stratification
