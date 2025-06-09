@@ -1,11 +1,7 @@
-# AI Dental Note Generator - Phase 3
+# Dental Note Generator with PDF & Risk Sheet
 
 Includes:
-- Radiograph comparison and vision analysis
-- Risk stratification
-- Patient education and take-home warning sheets
-
-Deploy with Streamlit Cloud or run locally:
-```
-streamlit run app.py
-```
+- GPT-4o AI-powered notes
+- Radiograph audit
+- Scary risk warning sheet
+- PDF download for patients
