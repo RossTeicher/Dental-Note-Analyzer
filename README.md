@@ -1,2 +1,2 @@
 # AI Dental Note Generator
-Expanded treatment options + Unicode-safe PDF generation
+This version includes Unicode-safe PDF generation with expanded treatment options.
