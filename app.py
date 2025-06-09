@@ -2,25 +2,67 @@
 import streamlit as st
 from openai import OpenAI
 import os
+from PIL import Image
+import pytesseract
+import tempfile
 
-# Set OpenAI API key
+# Set your OpenAI key (use secrets or environment variable in production)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-st.title("Dental Note Generator")
+st.title("🦷 AI Dental Note Generator")
 
-user_input = st.text_area("Enter clinical findings or notes:")
+st.markdown("""
+Upload the day's dental data:
+1. Procedure Codes (e.g., D1110, D4341)
+2. Perio Chart (PDF or Image)
+3. Radiograph (optional for now)
+""")
 
-if st.button("Generate Note"):
-    if user_input.strip() == "":
-        st.warning("Please enter some input.")
-    else:
-        with st.spinner("Generating note..."):
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that generates dental clinical notes."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            st.success("Note generated!")
-            st.text_area("Generated Note", response.choices[0].message.content, height=200)
+procedure_codes = st.text_area("Enter procedure codes or summary", "D1110, D4341")
+
+perio_chart_file = st.file_uploader("Upload Perio Chart (Image or PDF)", type=["png", "jpg", "jpeg", "pdf"])
+radiograph_file = st.file_uploader("Upload Radiograph (optional)", type=["png", "jpg", "jpeg"])
+
+def extract_text_from_file(uploaded_file):
+    if uploaded_file is not None:
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_path = tmp_file.name
+            if uploaded_file.type == "application/pdf":
+                from pdf2image import convert_from_path
+                images = convert_from_path(tmp_path)
+                text = "\n".join([pytesseract.image_to_string(img) for img in images])
+            else:
+                image = Image.open(tmp_path)
+                text = pytesseract.image_to_string(image)
+            return text
+    return ""
+
+generate_button = st.button("Generate Note")
+
+if generate_button and procedure_codes and perio_chart_file:
+    with st.spinner("Analyzing data and generating note..."):
+        # Extract text from perio chart
+        perio_text = extract_text_from_file(perio_chart_file)
+
+        # Compose the prompt for GPT
+        messages = [
+            {"role": "system", "content": "You are a dental assistant helping to generate SOAP notes."},
+            {"role": "user", "content": f"Here are the procedure codes: {procedure_codes}"},
+            {"role": "user", "content": f"Here is the perio chart data: {perio_text}"},
+            {"role": "user", "content": "Based on this information, generate a periodontal diagnosis and a complete clinical note."}
+        ]
+
+        # Call GPT
+        response = client.chat.completions.create(
+            model="gpt-4-turbo",
+            messages=messages
+        )
+
+        output = response.choices[0].message.content
+
+        st.subheader("Generated Note")
+        st.text_area("Output", output, height=400)
+
+else:
+    st.info("Please enter procedure codes and upload a perio chart.")
