@@ -72,12 +72,13 @@ if generate_button and procedure_codes and perio_chart_file:
                         {"type": "text", "text": f"Procedure codes performed today: {procedure_codes}"},
                         {"type": "text", "text": f"Periodontal chart data: {perio_text}"},
                         radiograph_summary,
-                        {"type": "text", "text": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing"}
+                        {"type": "text", "text": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing\n8. A take-home patient warning sheet summarizing risks of no treatment and encouraging follow-up care"}
                     ]}
                 ]
             )
 
             output = response.choices[0].message.content
+
             st.subheader("AI-Generated Note, Diagnosis & Plans")
             st.text_area("Output", output, height=500)
 

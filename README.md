@@ -1,8 +1,11 @@
-# AI Dental Note Generator - Phase 1+2
+# AI Dental Note Generator - Phase 3
 
 Includes:
+- Radiograph comparison and vision analysis
 - Risk stratification
-- Recommendations and precautions
-- Plain-language patient education worksheet
+- Patient education and take-home warning sheets
 
-Run locally or deploy on Streamlit Cloud.
+Deploy with Streamlit Cloud or run locally:
+```
+streamlit run app.py
+```
