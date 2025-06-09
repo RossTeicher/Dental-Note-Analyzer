@@ -1,6 +1,6 @@
 streamlit
 openai
+pillow
 pytesseract
 pdf2image
-Pillow
 fpdf
