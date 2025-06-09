@@ -1,7 +1,7 @@
-# Dental Note Generator with PDF & Risk Sheet
+# Dental Note Generator
 
 Includes:
-- GPT-4o AI-powered notes
-- Radiograph audit
-- Scary risk warning sheet
+- AI note generation
+- Risk stratification
+- Strong warning language
 - PDF download for patients

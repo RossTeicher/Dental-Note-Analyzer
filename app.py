@@ -1,3 +1,4 @@
+
 import streamlit as st
 from openai import OpenAI
 import os
@@ -6,6 +7,7 @@ import pytesseract
 import tempfile
 from pdf2image import convert_from_path
 from openai import OpenAI, OpenAIError
+import base64
 
 # Set your OpenAI key from Streamlit secrets
 oai_key = os.getenv("OPENAI_API_KEY")
@@ -16,7 +18,7 @@ st.title("🦷 AI Dental Note Generator + In-Depth Analyzer")
 st.markdown("""
 Upload the day's dental data:
 1. Procedure Codes (e.g., D1110, D4341)
-2. Perio Chart (Image or PDF)
+2. Perio Chart (PDF or Image)
 3. Radiograph (optional for now)
 """)
 
@@ -41,8 +43,6 @@ def extract_text_from_file(uploaded_file):
             except Exception as e:
                 st.error(f"OCR Error: {e}")
     return ""
-
-import base64
 
 def extract_radiograph_summary(file):
     if file:
@@ -88,7 +88,8 @@ if generate_button and procedure_codes and perio_chart_file:
                 pdf.set_auto_page_break(auto=True, margin=15)
                 pdf.set_font("Arial", size=12)
                 for line in output.split("\n"):
-                    pdf.multi_cell(0, 10, line)
+                    if line.strip():
+                        pdf.multi_cell(0, 10, line)
                 pdf_file_path = os.path.join(tempfile.gettempdir(), "patient_output.pdf")
                 pdf.output(pdf_file_path)
                 with open(pdf_file_path, "rb") as f:
@@ -100,3 +101,4 @@ if generate_button and procedure_codes and perio_chart_file:
             st.error(f"Unexpected error: {e}")
 else:
     st.info("Please enter procedure codes and upload a perio chart.")
+
