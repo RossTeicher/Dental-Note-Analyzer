@@ -1,4 +1,3 @@
-
 import streamlit as st
 from openai import OpenAI
 import os
@@ -65,7 +64,7 @@ if generate_button and procedure_codes and perio_chart_file:
             radiograph_summary = extract_radiograph_summary(radiograph_file)
 
             response = client.chat.completions.create(
-                model="gpt-4-vision-preview",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": "You are an expert dental AI assistant trained to provide in-depth diagnostic assessments and treatment planning."},
                     {"role": "user", "content": [
@@ -78,6 +77,7 @@ if generate_button and procedure_codes and perio_chart_file:
             )
 
             output = response.choices[0].message.content
+
             st.subheader("AI-Generated Note, Diagnosis & Plans")
             st.text_area("Output", output, height=500)
 
