@@ -1,3 +1,4 @@
+
 import streamlit as st
 from openai import OpenAI
 import os
@@ -23,7 +24,7 @@ Upload the day's dental data:
 
 procedure_codes = st.text_area("Enter procedure codes or summary", "D1110, D4341")
 
-perio_chart_file = st.file_uploader("Upload Perio Chart (Image or PDF)", type=["png", "jpg", "jpeg", "pdf"])
+perio_chart_file = st.file_uploader("Upload Perio Chart (PDF or Image)", type=["png", "jpg", "jpeg", "pdf"])
 radiograph_file = st.file_uploader("Upload Radiograph (optional)", type=["png", "jpg", "jpeg"])
 
 def extract_text_from_file(uploaded_file):
@@ -71,13 +72,12 @@ if generate_button and procedure_codes and perio_chart_file:
                         {"type": "text", "text": f"Procedure codes performed today: {procedure_codes}"},
                         {"type": "text", "text": f"Periodontal chart data: {perio_text}"},
                         radiograph_summary,
-                        {"type": "text", "text": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each."}
+                        {"type": "text", "text": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing"}
                     ]}
                 ]
             )
 
             output = response.choices[0].message.content
-
             st.subheader("AI-Generated Note, Diagnosis & Plans")
             st.text_area("Output", output, height=500)
 

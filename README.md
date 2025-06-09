@@ -1,9 +1,8 @@
-# AI Dental Note Generator (GPT-4o Version)
+# AI Dental Note Generator - Phase 1+2
 
-This app generates detailed SOAP notes, diagnoses, and treatment options from procedure codes, perio charts, and radiographs using GPT-4o.
+Includes:
+- Risk stratification
+- Recommendations and precautions
+- Plain-language patient education worksheet
 
-## How to Run
-1. Set your `OPENAI_API_KEY`
-2. Install dependencies from `requirements.txt`
-3. Install system packages from `packages.txt`
-4. Run with `streamlit run app.py`
+Run locally or deploy on Streamlit Cloud.
