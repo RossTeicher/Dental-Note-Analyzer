@@ -1,4 +1,3 @@
-
 import streamlit as st
 from openai import OpenAI
 import os
@@ -68,7 +67,7 @@ if generate_button and procedure_codes and perio_chart_file:
                 {"role": "system", "content": "You are an expert dental AI assistant trained to provide in-depth diagnostic assessments and treatment planning."},
                 {"role": "user", "content": f"Procedure codes performed today: {procedure_codes}"},
                 {"role": "user", "content": f"Periodontal chart data: {perio_text}"},
-                {"role": "user", "content": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing\n8. A take-home patient warning sheet summarizing risks of no treatment and encouraging follow-up care written in strong, urgent language to emphasize potential consequences and improve case acceptance"}
+                {"role": "user", "content": "Based on the provided clinical information, generate:\n1. A complete SOAP clinical note\n2. A detailed periodontal diagnosis\n3. A list of possible differential diagnoses for any findings\n4. At least three treatment plan options including one that takes no action, with pros and cons of each. The treatment options should cover general, cosmetic, surgical, and prosthetic possibilities — including implants, veneers, crowns, bridges, scaling and root planing, or extraction when appropriate.\n5. A risk stratification (low, moderate, high) based on findings and patient/systemic factors\n6. Personalized treatment urgency and precautions\n7. A plain-language patient education worksheet describing their condition, recommended treatment, and risks of doing nothing\n8. A take-home patient warning sheet summarizing risks of no treatment and encouraging follow-up care written in strong, urgent language to emphasize potential consequences and improve case acceptance"}
             ]
 
             response = client.chat.completions.create(

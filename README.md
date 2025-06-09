@@ -1,7 +1,2 @@
-# AI Dental Note Generator
-
-Includes:
-- GPT-4o in-depth note generation
-- Radiograph and Perio Chart parsing
-- Patient warning PDF export
-- Risk stratification
+# Dental Note Generator with Expanded Treatment Options
+Includes risk stratification, PDF generation, and options for implants, veneers, and surgical care.
