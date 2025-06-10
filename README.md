@@ -1,12 +1,12 @@
-# Final Phase 7: Dental Note Generator with Consent + Risk Tracker
+# Phase 11: Visual Analytics + Consent Signatures + Animations
 
 ## Features
-- SOAP Note, Diagnosis & Tx Plans
-- Risk Stratification & Longitudinal Analysis
-- Consent Form + Patient Education PDF
+- Visual analytics for case acceptance
+- Patient signature field for PDF consent forms
+- Placeholder module for AI-powered patient animation generation
 
 ## Setup
-```bash
+```
 pip install -r requirements.txt
 streamlit run app.py
 ```

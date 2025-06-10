@@ -1,6 +1,8 @@
 streamlit
 openai
-pillow
+fpdf
 pytesseract
 pdf2image
-fpdf
+Pillow
+pandas
+matplotlib
