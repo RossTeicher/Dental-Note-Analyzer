@@ -1,37 +1,31 @@
 import streamlit as st
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 import os
 from PIL import Image
 import pytesseract
 import tempfile
 from pdf2image import convert_from_path
-from openai import OpenAI, OpenAIError
 import base64
 import re
 from fpdf import FPDF
 
-oai_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=oai_key)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-st.title("🦷 AI Dental Analyzer - Phase 4: Expanded Data Integration")
+st.title("🦷 Phase 7: Longitudinal Risk + Smart Consent Generator")
 
-st.markdown("Upload today's data and prior information for a deep analysis.")
-
-procedure_codes = st.text_area("Enter Procedure Codes", "D1110, D4341")
+procedure_codes = st.text_area("Today's Procedure Codes", "D4341, D4910")
 perio_chart_file = st.file_uploader("Upload Perio Chart", type=["png", "jpg", "jpeg", "pdf"])
-radiograph_file = st.file_uploader("Upload Today's Radiograph", type=["png", "jpg", "jpeg"])
-previous_radiograph_file = st.file_uploader("Upload Previous Radiograph", type=["png", "jpg", "jpeg"])
-intraoral_images = st.file_uploader("Upload Intraoral Photos", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
-docs = st.file_uploader("Upload Additional Documents", type=["pdf", "txt"], accept_multiple_files=True)
-previous_notes = st.file_uploader("Upload Previous SOAP Notes", type=["pdf", "txt"], accept_multiple_files=True)
+previous_notes = st.file_uploader("Upload Previous Notes", type=["pdf", "txt"], accept_multiple_files=True)
+med_hx = st.text_area("Medical History (optional)", "Diabetes, smoking")
+today_summary = st.text_area("Today's Clinical Summary", "Generalized 5-6mm pockets, BOP, calculus subgingivally.")
 
-def extract_text(uploaded_file):
-    if uploaded_file:
+def extract_text(file):
+    if file:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(uploaded_file.read())
+            tmp.write(file.read())
             tmp_path = tmp.name
             try:
-                if uploaded_file.type == "application/pdf":
+                if file.type == "application/pdf":
                     images = convert_from_path(tmp_path)
                     return "\n".join([pytesseract.image_to_string(img) for img in images])
                 else:
@@ -41,40 +35,23 @@ def extract_text(uploaded_file):
                 return f"OCR Error: {e}"
     return ""
 
-def aggregate_text(file_list):
-    text = ""
-    for f in file_list:
-        extracted = extract_text(f)
-        if extracted:
-            text += f"\n---\n{extracted}"
-    return text
+def combine_notes(files):
+    return "\n".join([extract_text(f) for f in files]) if files else ""
 
-def get_image_data(file):
-    if file:
-        encoded = base64.b64encode(file.read()).decode("utf-8")
-        return {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}}
-    return None
-
-generate = st.button("Generate Comprehensive AI Note")
-
-if generate and procedure_codes and perio_chart_file:
-    with st.spinner("Analyzing all uploaded content..."):
+if st.button("Generate Risk Assessment + Consent Form") and perio_chart_file:
+    with st.spinner("Processing..."):
         try:
             perio_text = extract_text(perio_chart_file)
-            rad_today = get_image_data(radiograph_file)
-            rad_prev = get_image_data(previous_radiograph_file)
-            intraoral_summaries = [get_image_data(img) for img in intraoral_images] if intraoral_images else []
-            doc_text = aggregate_text(docs) if docs else ""
-            old_notes = aggregate_text(previous_notes) if previous_notes else ""
+            prior_notes = combine_notes(previous_notes)
 
             messages = [
-                {"role": "system", "content": "You are a senior dental AI analyst reviewing complete clinical context."},
-                {"role": "user", "content": f"Today's Procedure Codes: {procedure_codes}"},
-                {"role": "user", "content": f"Periodontal Chart: {perio_text}"},
-                {"role": "user", "content": f"Additional Documents: {doc_text}"},
-                {"role": "user", "content": f"Previous Notes: {old_notes}"},
-                {"role": "user", "content": "If intraoral and radiograph images are present, analyze them for findings. Compare today's radiograph with any prior radiograph and note any progression, regression, or unchanged findings."},
-                {"role": "user", "content": "Summarize: (1) A SOAP note (2) Diagnosis (3) Differential (4) Treatment options including do-nothing (5) Progress tracking from previous notes (6) Patient education worksheet (7) Risk warning sheet"}
+                {"role": "system", "content": "You are a dental AI trained to assess risk over time and generate consent forms."},
+                {"role": "user", "content": f"Today's procedures: {procedure_codes}"},
+                {"role": "user", "content": f"Perio chart: {perio_text}"},
+                {"role": "user", "content": f"Medical history: {med_hx}"},
+                {"role": "user", "content": f"Today's summary: {today_summary}"},
+                {"role": "user", "content": f"Previous notes: {prior_notes}"},
+                {"role": "user", "content": "Perform a longitudinal risk assessment based on current and prior findings, systemic risks, and prior recommendations. Then, generate a smart, patient-friendly consent form for today’s planned procedures including legal disclaimers and risks of not proceeding with treatment."}
             ]
 
             response = client.chat.completions.create(
@@ -83,9 +60,30 @@ if generate and procedure_codes and perio_chart_file:
             )
 
             output = response.choices[0].message.content
+            st.subheader("🧠 AI Output")
+            st.text_area("Generated Content", output, height=600)
 
-            st.subheader("📋 Full AI Note Output")
-            st.text_area("Output", output, height=500)
+            consent_match = re.search(r"(?si)Consent Form(?:\:|\s*
+)(.*)", output)
+            consent_text = consent_match.group(1).strip() if consent_match else "Consent form content not found."
 
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+            for line in consent_text.split("\n"):
+                if line.strip():
+                    try:
+                        pdf.multi_cell(0, 10, line)
+                    except UnicodeEncodeError:
+                        pdf.multi_cell(0, 10, line.encode('latin-1', 'replace').decode('latin-1'))
+
+            pdf_path = os.path.join(tempfile.gettempdir(), "longitudinal_consent_form.pdf")
+            pdf.output(pdf_path)
+
+            with open(pdf_path, "rb") as f:
+                st.download_button("📄 Download Consent Form PDF", f, file_name="longitudinal_consent_form.pdf", mime="application/pdf")
+
+        except OpenAIError as e:
+            st.error(f"OpenAI API error: {e}")
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Unexpected error: {e}")
