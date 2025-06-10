@@ -1,17 +1,19 @@
-# Phase 12: Complete Integrated Dental AI System
+# Phase 13: Direct Animation Integration
 
-## Features
-- Full SOAP clinical note + periodontal diagnosis
-- AI-generated differential diagnoses & risk stratification
-- Multiple treatment options including no treatment
-- Plain-language patient education + urgent warning summary
-- Multilingual consent form generator (English, Spanish, Russian, French, Haitian Creole)
-- Signature capture and downloadable consent PDF
-- Analytics dashboard tracking case acceptance
-- AI-generated animation scripts per procedure
+This module demonstrates the concept of sending generated patient animation scripts to a service like [D-ID](https://www.d-id.com/) to produce narrated videos.
 
-## Instructions
-```
-pip install -r requirements.txt
-streamlit run app.py
+## How It Works
+- You input a procedure and patient language
+- The AI generates a plain-language script
+- The script is sent to the D-ID API (or similar)
+- You get back a video URL or downloadable file
+
+## Integration
+Replace the stub in `did_integration.py` with actual D-ID API requests using your API key.
+
+## Example Usage
+```python
+from did_integration import generate_did_video
+video_url = generate_did_video("Your tooth needs a crown because...")
+print(video_url)
 ```
