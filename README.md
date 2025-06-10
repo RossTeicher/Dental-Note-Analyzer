@@ -1,19 +1,20 @@
-# Phase 13: Direct Animation Integration
+# Phase 14: Synthesia Integration + Streamlit Video Embedding
 
-This module demonstrates the concept of sending generated patient animation scripts to a service like [D-ID](https://www.d-id.com/) to produce narrated videos.
+This module prepares a patient-friendly video script and embeds a placeholder Synthesia video.
 
-## How It Works
-- You input a procedure and patient language
-- The AI generates a plain-language script
-- The script is sent to the D-ID API (or similar)
-- You get back a video URL or downloadable file
+## Features
+- Generate AI-narrated video scripts based on dental procedure and language
+- Embed sample Synthesia video directly into Streamlit
+- Customize script in multiple languages
 
-## Integration
-Replace the stub in `did_integration.py` with actual D-ID API requests using your API key.
+## Next Steps
+To fully integrate with Synthesia:
+1. [Get Synthesia API access](https://www.synthesia.io/)
+2. Replace the stubbed logic in `synthesia_stub.py` with real API calls
+3. Capture the video URL and dynamically display it in Streamlit
 
-## Example Usage
-```python
-from did_integration import generate_did_video
-video_url = generate_did_video("Your tooth needs a crown because...")
-print(video_url)
+## Run the App
+```
+pip install streamlit
+streamlit run app.py
 ```
