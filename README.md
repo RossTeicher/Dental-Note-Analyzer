@@ -1,10 +1,9 @@
-# Merged Phase 7 (Fixed): Dental Note Generator
+# Final Phase 7: Dental Note Generator with Consent + Risk Tracker
 
-Includes:
-- Full SOAP/dx/tx planning
-- Longitudinal risk assessment
-- Patient PDFs (Education & Warning)
-- Smart Consent Form
+## Features
+- SOAP Note, Diagnosis & Tx Plans
+- Risk Stratification & Longitudinal Analysis
+- Consent Form + Patient Education PDF
 
 ## Setup
 ```bash
