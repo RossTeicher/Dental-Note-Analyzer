@@ -1,10 +1,10 @@
-# Merged Phase 7: Full Dental Note Generator
+# Merged Phase 7 (Fixed): Dental Note Generator
 
-### 🔍 Includes:
-- SOAP note, Dx, differential & Tx plans
+Includes:
+- Full SOAP/dx/tx planning
 - Longitudinal risk assessment
-- Smart consent form
-- Patient education + warning sheets
+- Patient PDFs (Education & Warning)
+- Smart Consent Form
 
 ## Setup
 ```bash

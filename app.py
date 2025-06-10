@@ -59,6 +59,30 @@ if st.button("Generate Full Report") and perio_chart_file:
             prior_notes = combine_notes(previous_notes)
             radiograph_encoded = extract_image_data(radiograph_file)
 
+            prompt_content = (
+                "Generate:
+"
+                "1. A complete SOAP note
+"
+                "2. Periodontal diagnosis
+"
+                "3. Differential diagnoses
+"
+                "4. 3 treatment plans (including one with no action)
+"
+                "5. Risk stratification
+"
+                "6. Urgency & precautions
+"
+                "7. Patient Education Worksheet
+"
+                "8. Take-Home Patient Warning Sheet
+"
+                "9. A longitudinal risk assessment based on current and prior findings
+"
+                "10. A smart consent form with risks, disclaimers, and patient-friendly language"
+            )
+
             messages = [
                 {"role": "system", "content": "You are a dental AI assistant with expertise in diagnosis, risk scoring, and consent documentation."},
                 {"role": "user", "content": f"Procedure codes: {procedure_codes}"},
@@ -66,17 +90,7 @@ if st.button("Generate Full Report") and perio_chart_file:
                 {"role": "user", "content": f"Medical history: {med_hx}"},
                 {"role": "user", "content": f"Today's clinical summary: {today_summary}"},
                 {"role": "user", "content": f"Previous notes: {prior_notes}"},
-                {"role": "user", "content": "Generate:
-1. A complete SOAP note
-2. Periodontal diagnosis
-3. Differential diagnoses
-4. 3 treatment plans (including one with no action)
-5. Risk stratification
-6. Urgency & precautions
-7. Patient Education Worksheet
-8. Take-Home Patient Warning Sheet
-9. A longitudinal risk assessment based on current and prior findings
-10. A smart consent form with risks, disclaimers, and patient-friendly language"}
+                {"role": "user", "content": prompt_content}
             ]
 
             if radiograph_encoded:
@@ -110,7 +124,6 @@ if st.button("Generate Full Report") and perio_chart_file:
             with open(pdf_path, "rb") as f:
                 st.download_button("📄 Download Patient PDF", f, file_name="patient_summary_output.pdf", mime="application/pdf")
 
-            # Consent Form Extraction
             consent_match = re.search(r"(?si)Consent Form(?:\:|\s*\n)(.*)", output)
             consent_text = consent_match.group(1).strip() if consent_match else ""
 
