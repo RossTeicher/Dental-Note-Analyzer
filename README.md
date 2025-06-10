@@ -1,3 +1,3 @@
-# AI Dental Note Generator
+# Dental Note Generator - Phase 4
 
-Generates SOAP notes, diagnoses, treatment options, and patient handouts using GPT-4o.
+Expanded clinical context analysis including documents, previous notes, intraoral photos, and radiograph comparison.
