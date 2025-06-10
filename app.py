@@ -63,8 +63,7 @@ if st.button("Generate Risk Assessment + Consent Form") and perio_chart_file:
             st.subheader("🧠 AI Output")
             st.text_area("Generated Content", output, height=600)
 
-            consent_match = re.search(r"(?si)Consent Form(?:\:|\s*
-)(.*)", output)
+            consent_match = re.search(r"(?si)Consent Form(?:\:|\s*\n)(.*)", output)
             consent_text = consent_match.group(1).strip() if consent_match else "Consent form content not found."
 
             pdf = FPDF()
