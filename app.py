@@ -1,16 +1,25 @@
 import streamlit as st
-from openai import OpenAI, OpenAIError
 import os
 import tempfile
 from PIL import Image
 import pytesseract
 from pdf2image import convert_from_path
 from fpdf import FPDF
+from openai import OpenAI, OpenAIError
 import re
+import base64
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-st.title("🦷 AI Dental Suite – Enhanced Note Generator with Scary Sheet & Med History")
+st.title("🦷 AI Dental Suite – Full-Stack Generator")
+
+st.markdown("""
+Upload the full clinical package below. This app includes:
+- 📋 Procedure + Medical History Analyzer
+- 🦷 AI SOAP + Diagnosis + Treatment Generator
+- ⚠️ Scary Take-Home Summary & PDF
+- 🎥 AI Video Script (synthesia-ready placeholder)
+""")
 
 # Inputs
 procedure_codes = st.text_area("Procedure Codes", "D1110, D4341")
@@ -19,6 +28,7 @@ medical_history = st.text_area("Relevant Medical History", "Hypertension, diabet
 perio_chart = st.file_uploader("Upload Perio Chart (PDF/Image)", type=["pdf", "png", "jpg", "jpeg"])
 radiograph = st.file_uploader("Upload Radiograph (optional)", type=["png", "jpg", "jpeg"])
 
+# Utility functions
 def extract_text(file):
     if file:
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
@@ -35,33 +45,35 @@ def extract_patient_summary(text):
     warn_match = re.search(r"(?si)Take[-\s]*Home\s+Patient\s+Warning\s+Sheet.*?:?\s*(.*)", text)
     return (edu_match.group(1).strip() if edu_match else ""), (warn_match.group(1).strip() if warn_match else "")
 
-if st.button("🧠 Generate Note & Patient Handout"):
-    with st.spinner("Analyzing patient data..."):
+if st.button("🚀 Generate Full Report & Assets"):
+    with st.spinner("Running analysis..."):
         try:
             perio_text = extract_text(perio_chart)
-            full_prompt = (
+
+            prompt = (
                 f"Procedure codes: {procedure_codes}\n"
                 f"Clinical Notes: {notes}\n"
                 f"Medical History: {medical_history}\n"
                 f"Perio Chart: {perio_text}\n"
-                "Generate the following:\n"
-                "1. Complete SOAP note\n"
-                "2. Perio diagnosis\n"
+                "Generate:\n"
+                "1. A complete SOAP note\n"
+                "2. Detailed periodontal diagnosis\n"
                 "3. Differential diagnoses\n"
-                "4. Three treatment options (one with no action)\n"
+                "4. Treatment options including doing nothing\n"
                 "5. Risk stratification\n"
-                "6. Treatment urgency\n"
+                "6. Urgency of treatment\n"
                 "7. Patient Education Worksheet\n"
-                "8. Take-Home Patient Warning Sheet with strong, scary language to motivate treatment"
+                "8. Take-Home Warning Sheet in layman’s terms, urgent tone\n"
+                "9. Script for an AI-generated video explaining the patient's condition and the importance of follow-up care in plain language"
             )
 
             response = client.chat.completions.create(
                 model="gpt-4o",
-                messages=[{"role": "user", "content": full_prompt}]
+                messages=[{"role": "user", "content": prompt}]
             )
-
             result = response.choices[0].message.content
-            st.subheader("📝 Full Note & Report")
+
+            st.subheader("📝 Full Note & Output")
             st.text_area("Generated Report", result, height=400)
 
             edu, warn = extract_patient_summary(result)
@@ -72,7 +84,7 @@ if st.button("🧠 Generate Note & Patient Handout"):
                 st.markdown("#### Take-Home Warning Sheet")
                 st.warning(warn)
 
-                # PDF generation
+                # PDF export
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_auto_page_break(auto=True, margin=15)
@@ -82,10 +94,16 @@ if st.button("🧠 Generate Note & Patient Handout"):
                         pdf.multi_cell(0, 10, line)
                     except UnicodeEncodeError:
                         pdf.multi_cell(0, 10, line.encode("latin-1", "replace").decode("latin-1"))
-                pdf_path = os.path.join(tempfile.gettempdir(), "scary_sheet.pdf")
+                pdf_path = os.path.join(tempfile.gettempdir(), "takehome_sheet.pdf")
                 pdf.output(pdf_path)
                 with open(pdf_path, "rb") as f:
-                    st.download_button("📥 Download Patient Scary Sheet", f, file_name="take_home_sheet.pdf")
+                    st.download_button("📥 Download Take-Home Sheet", f, file_name="takehome_sheet.pdf")
+
+            # Show AI video script
+            video_script_match = re.search(r"(?si)video.*?script.*?:?\s*(.*)", result)
+            if video_script_match:
+                st.subheader("🎥 AI Video Script Preview")
+                st.code(video_script_match.group(1).strip())
 
         except OpenAIError as e:
             st.error(f"OpenAI API error: {e}")
