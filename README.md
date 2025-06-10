@@ -1,12 +1,13 @@
-# Phase 7: Longitudinal Risk + Consent Form Generator
+# Merged Phase 7: Full Dental Note Generator
 
-## Features
-- Longitudinal risk analysis across notes and perio charts
-- Medical-systemic risk integration
-- Auto-generated patient-specific consent forms
+### 🔍 Includes:
+- SOAP note, Dx, differential & Tx plans
+- Longitudinal risk assessment
+- Smart consent form
+- Patient education + warning sheets
 
 ## Setup
-```
+```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
