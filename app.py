@@ -1,49 +1,68 @@
+
 import streamlit as st
 import json
+import os
 
 st.set_page_config(page_title="Dental Note Analyzer", layout="centered")
-
 st.title("🦷 Dental Note Analyzer")
 st.subheader("Module 1: Smart Note Generator")
-st.markdown("This module will use patient data and clinical findings to generate legally sound SOAP notes.")
-st.info("Upload patient data or connect to a database to begin generating notes. (Open Dental integration coming soon!)")
 
-uploaded_file = st.file_uploader("Upload Patient JSON File", type=["json"])
+st.info("This module will use patient data and clinical findings to generate legally sound SOAP notes.")
+
+uploaded_file = st.file_uploader("Upload Full Patient Profile (.json)", type=["json"])
+
 if uploaded_file:
     try:
-        patient_data = json.load(uploaded_file)
-        st.success("Patient data loaded successfully!")
+        data = json.load(uploaded_file)
 
-        # Simulate note generation (SOAP)
-        subjective = patient_data.get("subjective", "No subjective findings provided.")
-        objective = patient_data.get("objective", "No objective findings provided.")
-        assessment = patient_data.get("assessment", "No assessment provided.")
-        plan = patient_data.get("plan", "No treatment plan provided.")
+        st.success("Patient data uploaded successfully.")
 
-        st.markdown("### 📄 Generated SOAP Note")
-        st.code(f'''
-Subjective:
-{subjective}
+        # Display core data categories
+        with st.expander("🧍 Basic Info"):
+            st.json(data.get("basic_info", {}))
 
-Objective:
-{objective}
+        with st.expander("💳 Insurance Info"):
+            st.json(data.get("insurance_info", {}))
 
-Assessment:
-{assessment}
+        with st.expander("👨‍⚕️ Provider Info"):
+            st.json(data.get("provider_info", {}))
 
-Plan:
-{plan}
-        ''', language="markdown")
+        with st.expander("📅 Appointment History"):
+            st.json(data.get("appointments", []))
 
-        st.download_button("Download SOAP Note as .txt", f'''
-Subjective:\n{subjective}\n
-Objective:\n{objective}\n
-Assessment:\n{assessment}\n
-Plan:\n{plan}
-        ''', file_name="soap_note.txt")
-    except Exception as e:
-        st.error(f"Failed to read file: {e}")
+        with st.expander("🚨 Allergies & Medical Alerts"):
+            st.json(data.get("alerts", {}))
 
-st.markdown("---")
-st.subheader("Coming Soon")
-st.markdown("- 📸 Radiograph AI Analysis\n- 🔗 Direct EHR Integration\n- 📑 Auto-export to PDF and Clinical Records")
+        with st.expander("💊 Medications & Conditions"):
+            st.json({
+                "Medications": data.get("medications", []),
+                "Conditions": data.get("medical_conditions", [])
+            })
+
+        with st.expander("📋 Treatment Plans"):
+            st.json({
+                "Ongoing": data.get("ongoing_treatment", []),
+                "Planned": data.get("planned_procedures", [])
+            })
+
+        with st.expander("✅ Completed Procedures"):
+            st.json(data.get("completed_procedures", []))
+
+        with st.expander("📝 Past Notes"):
+            st.json(data.get("notes", []))
+
+        with st.expander("📸 Radiographs"):
+            st.json(data.get("radiographs", []))
+
+        with st.expander("🦷 Perio Charting"):
+            st.json(data.get("perio_charting", {}))
+
+        st.divider()
+        if st.button("Generate SOAP Note"):
+            # Placeholder for smart logic
+            st.warning("Note generation logic not implemented yet. Coming soon!")
+
+    except json.JSONDecodeError:
+        st.error("Invalid JSON file. Please upload a properly formatted file.")
+else:
+    st.warning("Please upload a patient JSON file to begin.")
