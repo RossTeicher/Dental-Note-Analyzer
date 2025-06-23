@@ -18,7 +18,7 @@ if uploaded_file:
         st.success("Patient data uploaded successfully.")
 
         # Display core data categories
-        with st.expander("🧍 Basic Info"):
+        with st.expander("🧝 Basic Info"):
             st.json(data.get("basic_info", {}))
 
         with st.expander("💳 Insurance Info"):
@@ -27,7 +27,7 @@ if uploaded_file:
         with st.expander("👨‍⚕️ Provider Info"):
             st.json(data.get("provider_info", {}))
 
-        with st.expander("📅 Appointment History"):
+        with st.expander("🗕 Appointment History"):
             st.json(data.get("appointments", []))
 
         with st.expander("🚨 Allergies & Medical Alerts"):
@@ -59,8 +59,31 @@ if uploaded_file:
 
         st.divider()
         if st.button("Generate SOAP Note"):
-            # Placeholder for smart logic
-            st.warning("Note generation logic not implemented yet. Coming soon!")
+            basic = data.get("basic_info", {})
+            conditions = data.get("medical_conditions", [])
+            meds = data.get("medications", [])
+            alerts = data.get("alerts", {})
+            ongoing = data.get("ongoing_treatment", [])
+            planned = data.get("planned_procedures", [])
+            notes = data.get("notes", [])
+
+            soap_note = f"""**Subjective:**
+Patient {basic.get('name', 'N/A')} presents with known medical conditions: {', '.join(conditions) or 'None reported'}.
+Medications include: {', '.join(meds) or 'None reported'}.
+Allergies and alerts: {alerts.get('allergies', 'None')} | {alerts.get('medical_alerts', 'None')}.
+
+**Objective:**
+Clinical findings from radiographs and perio charting reviewed.
+Ongoing treatments: {', '.join([t.get('description', '') for t in ongoing]) or 'None'}.
+
+**Assessment:**
+Review of notes and completed procedures supports continuity of care. Past assessments:
+{chr(10).join([note.get('content', '') for note in notes[-3:]]) or 'No recent notes available.'}
+
+**Plan:**
+Planned procedures include: {', '.join([p.get('procedure', '') for p in planned]) or 'No upcoming procedures scheduled.'}"""
+
+            st.code(soap_note.strip(), language="markdown")
 
     except json.JSONDecodeError:
         st.error("Invalid JSON file. Please upload a properly formatted file.")
