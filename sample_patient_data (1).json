@@ -1,0 +1,90 @@
+{
+    "basic_info": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "dob": "1985-05-15",
+        "gender": "Male",
+        "patient_id": "123456"
+    },
+    "insurance_info": {
+        "provider": "Delta Dental",
+        "member_id": "D123456789",
+        "group_number": "GRP78910"
+    },
+    "provider_info": {
+        "provider_name": "Dr. Ross Teicher",
+        "provider_id": "DDS001"
+    },
+    "appointments": [
+        {
+            "date": "2025-06-10",
+            "type": "Cleaning"
+        },
+        {
+            "date": "2025-06-17",
+            "type": "Filling"
+        }
+    ],
+    "alerts": {
+        "allergies": [
+            "Penicillin"
+        ],
+        "medical_alerts": [
+            "Diabetes Type II"
+        ]
+    },
+    "medications": [
+        "Metformin",
+        "Lisinopril"
+    ],
+    "medical_conditions": [
+        "Hypertension",
+        "Diabetes"
+    ],
+    "ongoing_treatment": [
+        "Crown prep #14"
+    ],
+    "planned_procedures": [
+        "Implant placement #19"
+    ],
+    "completed_procedures": [
+        {
+            "tooth": 30,
+            "procedure": "Filling",
+            "date": "2025-06-01"
+        }
+    ],
+    "notes": [
+        {
+            "date": "2025-06-01",
+            "note": "Patient tolerated procedure well. No complications."
+        }
+    ],
+    "radiographs": [
+        {
+            "type": "PA",
+            "date": "2025-06-01",
+            "image_url": "https://example.com/xray1.jpg"
+        }
+    ],
+    "perio_charting": {
+        "2025-06-01": {
+            "pocket_depths": {
+                "1": [
+                    2,
+                    2,
+                    3
+                ],
+                "2": [
+                    3,
+                    2,
+                    2
+                ]
+            },
+            "bleeding_on_probing": [
+                "1",
+                "2"
+            ]
+        }
+    }
+}
