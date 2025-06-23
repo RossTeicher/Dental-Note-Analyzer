@@ -72,6 +72,11 @@ if uploaded_file:
             notes = data.get("notes", [])
             procedures = data.get("completed_procedures", [])
 
+            detailed_procedures = "\n".join([
+                f"- {p.get('procedure', 'Unknown')} on {p.get('date', '')} ({p.get('tooth', 'N/A')}): {p.get('details', 'No additional info')}"
+                for p in procedures
+            ]) or 'None'
+
             soap_note = f"""
 **Subjective:**
 Patient {basic.get('name', 'N/A')} presents for evaluation with known conditions: {', '.join(conditions) or 'None reported'}.
@@ -81,7 +86,7 @@ Medical alerts: {alerts.get('medical_alerts', 'None')} | Allergies: {alerts.get(
 **Objective:**
 Radiographs, perio charting, and scanned documents reviewed via AI-supported analysis.
 Ongoing treatment: {', '.join([t.get('description', '') for t in ongoing]) or 'None'}.
-Completed procedures: {', '.join([p.get('procedure', '') + ' on ' + p.get('date', '') for p in procedures]) or 'None'}.
+Completed procedures:\n{detailed_procedures}
 
 **Assessment:**
 Summarizing 3 most recent notes:
