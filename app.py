@@ -1,6 +1,5 @@
 import streamlit as st
 
-    st.session_state['app_loaded'] = True
 with st.sidebar:
     if st.button("🚀 Auto Run All Modules"):
         if "chart_data" in st.session_state and "treatment_plan" in st.session_state:
