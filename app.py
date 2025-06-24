@@ -1,4 +1,31 @@
 
+with st.sidebar:
+    if st.button("🚀 Auto Run All Modules"):
+        if "chart_data" in st.session_state and "treatment_plan" in st.session_state:
+            from patient_education_consent import generate_patient_consent_package
+            from compliance_auditor import audit_compliance
+
+            chart_data = st.session_state["chart_data"]
+            treatment_plan = st.session_state["treatment_plan"]
+
+            # Generate education + consent
+            consent, scary_note, education, video_description = generate_patient_consent_package(chart_data, treatment_plan, "English")
+            st.session_state["consent"] = consent
+            st.session_state["scary_note"] = scary_note
+            st.session_state["education"] = education
+            st.session_state["video_description"] = video_description
+
+            # Assume SOAP note already exists or set mock
+            st.session_state["soap_note"] = st.session_state.get("soap_note", "This is a mock SOAP note generated for audit.")
+
+            # Run compliance
+            compliance_summary = audit_compliance(st.session_state["soap_note"], treatment_plan)
+            st.session_state["compliance_summary"] = compliance_summary
+            st.success("✅ All modules run successfully. Compliance audit complete.")
+        else:
+            st.warning("Please upload chart and treatment plan in Module 5 to enable auto-run.")
+
+
 import streamlit as st
 import json
 import openai
@@ -219,3 +246,15 @@ with tab6:
 
         st.subheader("📋 Compliance Audit Report")
         st.text_area("Audit Summary", compliance_report, height=400)
+
+    if "scary_note" in st.session_state and "education" in st.session_state and "compliance_summary" in st.session_state:
+        from full_audit_packet_pdf import generate_audit_packet_pdf
+        audit_pdf_path = generate_audit_packet_pdf(
+            st.session_state["soap_note"],
+            st.session_state["consent"],
+            st.session_state["scary_note"],
+            st.session_state["education"],
+            st.session_state["compliance_summary"]
+        )
+        st.download_button(label="⬇️ Download Full Audit Packet PDF", file_name="Full_Audit_Packet.pdf", mime="application/pdf", data=open(audit_pdf_path, "rb").read())
+
