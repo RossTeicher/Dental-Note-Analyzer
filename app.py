@@ -9,12 +9,12 @@ from generate_soap_note import generate_soap_note
 from validate_treatment_plan import validate_treatment_plan
 
 st.set_page_config(page_title="Dental Note Analyzer", layout="wide")
-st.title("🦷 Dental Note Analyzer – Modules 1 & 2")
+st.title("🦷 Dental Note Analyzer – Unified App")
 
-# Sidebar nav
-tab = st.sidebar.radio("Select Module", ["📝 SOAP Note Generator", "📋 Treatment Plan Validator"])
+# Main UI with tabs
+tab1, tab2 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator"])
 
-if tab == "📝 SOAP Note Generator":
+with tab1:
     st.header("Module 1: Smart SOAP Note Generator")
 
     uploaded_chart = st.file_uploader("Upload patient JSON chart", type=["json"], key="chart")
@@ -71,7 +71,7 @@ if tab == "📝 SOAP Note Generator":
         st.subheader("Generated SOAP Note")
         st.text_area("SOAP Note", soap_note, height=400)
 
-elif tab == "📋 Treatment Plan Validator":
+with tab2:
     st.header("Module 2: AI Treatment Plan Validator")
 
     chart = st.file_uploader("Upload patient chart JSON", type=["json"], key="chart2")
