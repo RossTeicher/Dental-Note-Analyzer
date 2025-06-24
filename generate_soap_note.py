@@ -11,7 +11,6 @@ def generate_soap_note(patient_data, radiograph_findings):
     }
 
     today_summary = ""
-    # Dummy example for now
     completed_today = [
         {"code": "D0150", "tooth": ""},
         {"code": "D1110", "tooth": ""},
