@@ -1,10 +1,9 @@
 
 import openai
 
-def generate_soap_note(patient_data, radiograph_findings, perio_data=None, odontogram_data=None):
+def generate_soap_note(patient_data, radiograph_findings, perio_data=None, odontogram_data=None, documents=None):
     today_summary = ""
     completed_today = patient_data.get("procedures", [])
-
     cdt_code_map = {
         "D0150": "Comprehensive oral evaluation",
         "D1110": "Prophylaxis - adult",
@@ -20,9 +19,10 @@ def generate_soap_note(patient_data, radiograph_findings, perio_data=None, odont
         today_summary += f"- {desc} ({code}) on {tooth if tooth else 'unspecified'}\n"
 
     findings_summary = "\n".join(radiograph_findings)
+    doc_summary = "\n".join(documents) if documents else ""
 
     prompt = f"""
-    You are a clinical documentation assistant. Based on the following patient chart and diagnostics, write a formal, legally precise SOAP note.
+    You are a clinical documentation assistant. Based on the following inputs, write a legally formatted SOAP note.
 
     PATIENT DATA:
     {patient_data}
@@ -39,7 +39,10 @@ def generate_soap_note(patient_data, radiograph_findings, perio_data=None, odont
     ODONTOGRAM:
     {odontogram_data}
 
-    Format the note with Subjective, Objective, Assessment, and Plan sections. Summarize today's treatment, prior history, periodontal and restorative condition, and radiographic findings. Be precise and medically formal.
+    EXTERNAL DOCUMENTS:
+    {doc_summary}
+
+    Format with Subjective, Objective, Assessment, and Plan. Summarize today's treatment, prior history, radiographic and periodontal findings, odontogram status, and referral documents.
     """
 
     response = openai.ChatCompletion.create(
