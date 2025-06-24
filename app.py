@@ -12,7 +12,7 @@ st.set_page_config(page_title="Dental Note Analyzer", layout="wide")
 st.title("🦷 Dental Note Analyzer – Unified App")
 
 # Main UI with tabs
-tab1, tab2, tab3 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant"])
+tab1, tab2, tab3, tab4 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant", "📸 Radiograph Time-Series Analyzer"])
 
 with tab1:
     st.header("Module 1: Smart SOAP Note Generator")
@@ -138,3 +138,27 @@ with tab3:
         output = generate_diagnostic_summary(chart_data, odo_data, perio_data, doc_data, radiograph_findings)
         st.subheader("Diagnostic Assistant Output")
         st.text_area("Tooth-by-Tooth Diagnostic Summary", output, height=500)
+
+with tab4:
+    st.header("Module 4: Radiograph Time-Series Analyzer")
+
+    uploaded_rads = st.file_uploader("Upload Radiographs (JPG/PNG) – oldest to newest", type=["jpg", "jpeg", "png"], accept_multiple_files=True, key="rads4")
+    rad_labels = []
+    labeled_images = []
+
+    if uploaded_rads:
+        st.markdown("### 🗂️ Label each radiograph")
+        for i, img_file in enumerate(uploaded_rads):
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                label = st.text_input(f"Label for {img_file.name} (e.g. 'Before', 'After', '06-01-2024')", key=f"label_{i}")
+                rad_labels.append(label)
+            with col2:
+                st.image(img_file, caption=f"Uploaded: {img_file.name}", use_column_width=True)
+            labeled_images.append((img_file, label))
+
+    if labeled_images and st.button("🧠 Compare Radiographs"):
+        from radiograph_time_series import compare_radiographs
+        summary = compare_radiographs(labeled_images)
+        st.subheader("Radiographic Comparison Summary")
+        st.text_area("Radiologist-style Report", summary, height=500)
