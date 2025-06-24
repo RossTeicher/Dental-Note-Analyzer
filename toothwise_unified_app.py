@@ -1,9 +1,9 @@
-st.set_page_config(page_title="ToothWise – AI Dental Assistant", page_icon="🧠")
 
 import streamlit as st
 from PIL import Image
 import base64
 import os
+st.set_page_config(page_title="ToothWise – AI Dental Assistant", page_icon="🧠")
 
 # Load logo
 if "toothwise_logo.png" in os.listdir():
