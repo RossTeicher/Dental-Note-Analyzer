@@ -1,7 +1,7 @@
 
 import openai
 
-def generate_soap_note(patient_data, completed_today):
+def generate_soap_note(patient_data, radiograph_findings):
     cdt_code_map = {
         "D0150": "Comprehensive oral evaluation - new or established patient",
         "D1110": "Prophylaxis - adult",
@@ -11,10 +11,20 @@ def generate_soap_note(patient_data, completed_today):
     }
 
     today_summary = ""
+    # Dummy example for now
+    completed_today = [
+        {"code": "D0150", "tooth": ""},
+        {"code": "D1110", "tooth": ""},
+        {"code": "D2392", "tooth": "#30"},
+        {"code": "D2740", "tooth": "#8"},
+    ]
+
     for proc in completed_today:
         desc = cdt_code_map.get(proc["code"], "Unknown procedure")
         tooth = proc.get("tooth", "")
         today_summary += f"- {desc} ({proc['code']}) on {tooth if tooth else 'unspecified tooth'}\n"
+
+    findings_summary = "\n".join(radiograph_findings)
 
     prompt = f"""
     Generate a legally formatted SOAP note based on the following:
@@ -24,6 +34,9 @@ def generate_soap_note(patient_data, completed_today):
 
     TODAY'S VISIT:
     {today_summary}
+
+    RADIOGRAPH FINDINGS:
+    {findings_summary}
 
     Include subjective complaints, objective chart findings, assessment, and a treatment plan. Be precise, formal, and comprehensive.
     """

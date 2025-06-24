@@ -1,107 +1,64 @@
+
 import streamlit as st
-import json
-import os
+import openai
+from PIL import Image
+from patient_data_extractor import get_patient_full_record
+from generate_soap_note import generate_soap_note
 
-st.set_page_config(page_title="Dental Note Analyzer", layout="centered")
-st.title("🦷 Dental Note Analyzer")
-st.subheader("Module 1: Smart Note Generator")
+st.title("Dental Note Analyzer – Full Integration")
 
-st.info("This module will use patient data and clinical findings to generate legally sound, deposition-grade SOAP notes.")
+# Simulate DB config and patient ID (would be dynamic in production)
+db_config = {
+    "host": "localhost",
+    "user": "root",
+    "password": "password",
+    "database": "opendental"
+}
+patient_id = st.text_input("Enter Patient ID", "1")
 
-uploaded_file = st.file_uploader("Upload Full Patient Profile (.json)", type=["json"])
+if st.button("Pull Patient Data"):
+    patient_data = get_patient_full_record(patient_id, db_config)
+    st.success("Patient data successfully pulled.")
 
-if uploaded_file:
-    try:
-        data = json.load(uploaded_file)
+    # Upload radiographs
+    uploaded_images = st.file_uploader(
+        "Upload today's radiographs (JPG/PNG only)",
+        accept_multiple_files=True,
+        type=["jpg", "jpeg", "png"]
+    )
 
-        st.success("Patient data uploaded successfully.")
+    radiograph_findings = []
+    if uploaded_images:
+        for img_file in uploaded_images:
+            image = Image.open(img_file)
+            st.image(image, caption=f"Uploaded: {img_file.name}", use_column_width=True)
 
-        # Display core data categories
-        with st.expander("🧝 Basic Info"):
-            st.json(data.get("basic_info", {}))
+            prompt = """
+            You are a dental radiologist AI. Analyze this dental radiograph and provide:
+            1. Signs of decay, bone loss, infections, or abnormalities
+            2. Tooth numbers involved (if visible)
+            3. Signs of prior treatment (implants, crowns, root canals)
+            4. Overall impression
+            """
 
-        with st.expander("💳 Insurance Info"):
-            st.json(data.get("insurance_info", {}))
+            response = openai.ChatCompletion.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {"role": "user", "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_file.getvalue().hex()}"}}
+                    ]}
+                ],
+                max_tokens=800
+            )
 
-        with st.expander("👨‍⚕️ Provider Info"):
-            st.json(data.get("provider_info", {}))
+            finding = response.choices[0].message["content"]
+            st.markdown(f"**GPT-4 Vision Analysis for {img_file.name}:**")
+            st.write(finding)
+            radiograph_findings.append(finding)
 
-        with st.expander("🗕 Appointment History"):
-            st.json(data.get("appointments", []))
-
-        with st.expander("🚨 Allergies & Medical Alerts"):
-            st.json(data.get("alerts", {}))
-
-        with st.expander("💊 Medications & Conditions"):
-            st.json({
-                "Medications": data.get("medications", []),
-                "Conditions": data.get("medical_conditions", [])
-            })
-
-        with st.expander("📋 Treatment Plans"):
-            st.json({
-                "Ongoing": data.get("ongoing_treatment", []),
-                "Planned": data.get("planned_procedures", [])
-            })
-
-        with st.expander("✅ Completed Procedures"):
-            st.json(data.get("completed_procedures", []))
-
-        with st.expander("📝 Past Notes"):
-            st.json(data.get("notes", []))
-
-        with st.expander("📸 Radiographs"):
-            st.json(data.get("radiographs", []))
-            st.caption("(Vision analysis & time-series comparison handled by GPT-vision back-end API)")
-
-        with st.expander("🦷 Perio Charting"):
-            st.json(data.get("perio_charting", {}))
-
-        with st.expander("📄 Scanned Documents"):
-            st.json(data.get("documents", []))
-            st.caption("(OCR + NLP parsing handled in backend)")
-
-        st.divider()
-        if st.button("Generate SOAP Note"):
-            basic = data.get("basic_info", {})
-            conditions = data.get("medical_conditions", [])
-            meds = data.get("medications", [])
-            alerts = data.get("alerts", {})
-            ongoing = data.get("ongoing_treatment", [])
-            planned = data.get("planned_procedures", [])
-            notes = data.get("notes", [])
-            procedures = data.get("completed_procedures", [])
-
-            detailed_procedures = "\n".join([
-                f"- {p.get('procedure', 'Unknown')} on {p.get('date', '')} ({p.get('tooth', 'N/A')}): {p.get('details', 'No additional info')}"
-                for p in procedures
-            ]) or 'None'
-
-            soap_note = f"""
-**Subjective:**
-Patient {basic.get('name', 'N/A')} presents for evaluation with known conditions: {', '.join(conditions) or 'None reported'}.
-Medications: {', '.join(meds) or 'None reported'}.
-Medical alerts: {alerts.get('medical_alerts', 'None')} | Allergies: {alerts.get('allergies', 'None')}.
-
-**Objective:**
-Radiographs, perio charting, and scanned documents reviewed via AI-supported analysis.
-Ongoing treatment: {', '.join([t.get('description', '') for t in ongoing]) or 'None'}.
-Completed procedures:\n{detailed_procedures}
-
-**Assessment:**
-Summarizing 3 most recent notes:
-{chr(10).join([note.get('content', '') for note in notes[-3:]]) or 'No recent documentation.'}
-AI Risk Stratification: (Coming soon - Legal AI flags abnormal/systemic risks)
-
-**Plan:**
-Upcoming procedures: {', '.join([p.get('procedure', '') for p in planned]) or 'None scheduled.'}
-Voice dictation: Enabled via toggle (Coming soon)
-Legal mode: Active - Notes formatted for deposition-readiness
-"""
-
-            st.code(soap_note.strip(), language="markdown")
-
-    except json.JSONDecodeError:
-        st.error("Invalid JSON file. Please upload a properly formatted file.")
-else:
-    st.warning("Please upload a patient JSON file to begin.")
+    # Button to generate SOAP note
+    if st.button("Generate SOAP Note"):
+        soap_note = generate_soap_note(patient_data, radiograph_findings)
+        st.subheader("Generated SOAP Note")
+        st.text_area("SOAP Note", soap_note, height=400)
