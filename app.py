@@ -1,57 +1,25 @@
 
 import streamlit as st
 import openai
+import json
 from PIL import Image
 from generate_soap_note import generate_soap_note
 
-st.title("Dental Note Analyzer – Full Mock Mode (No DB Required)")
+st.title("Dental Note Analyzer – Mock Mode (JSON Upload + Radiographs)")
 
-# Expanded mock patient data simulating Open Dental structure
-patient_data = {
-    "core_info": {
-        "Name": "Jane Doe",
-        "DOB": "1992-06-15",
-        "Gender": "Female",
-        "Status": "Active",
-        "Language": "English",
-        "Race": "White",
-        "BillingType": "PPO"
-    },
-    "appointments": [
-        {"Date": "2025-06-21", "Type": "Recall", "Provider": "Dr. Smith", "Status": "Completed"},
-        {"Date": "2025-12-15", "Type": "Restorative", "Provider": "Dr. Smith", "Status": "Scheduled"}
-    ],
-    "medications": [
-        {"MedName": "Lisinopril", "Notes": "10mg daily"},
-        {"MedName": "Metformin", "Notes": "500mg twice daily"}
-    ],
-    "allergies": [
-        {"Allergy": "Penicillin", "Reaction": "Rash"}
-    ],
-    "conditions": [
-        {"Condition": "Hypertension"},
-        {"Condition": "Type II Diabetes"}
-    ],
-    "procedures": [
-        {"Code": "D0150", "Tooth": "", "Date": "2025-06-21"},
-        {"Code": "D1110", "Tooth": "", "Date": "2025-06-21"},
-        {"Code": "D2392", "Tooth": "#30", "Date": "2025-06-21"},
-        {"Code": "D2740", "Tooth": "#8", "Date": "2025-06-21"}
-    ],
-    "notes": [
-        {"Date": "2025-06-21", "Note": "Patient reports sensitivity on lower right molar."},
-        {"Date": "2025-01-10", "Note": "Patient declined fluoride application."}
-    ],
-    "recalls": [
-        {"Type": "Prophy", "DueDate": "2026-06-21", "LastCompleted": "2025-06-21"}
-    ],
-    "referrals": [
-        {"ReferredTo": "Endodontist", "Reason": "Possible RCT on #30", "Date": "2025-06-21"}
-    ],
-    "insurances": [
-        {"Carrier": "Delta Dental", "SubscriberID": "123456789", "GroupNumber": "GRP12345"}
-    ]
-}
+# Option to upload a JSON file simulating patient data
+uploaded_json = st.file_uploader("Upload a patient JSON file", type=["json"])
+
+if uploaded_json:
+    try:
+        patient_data = json.load(uploaded_json)
+        st.success("Patient chart JSON uploaded successfully.")
+        st.json(patient_data)
+    except Exception as e:
+        st.error(f"Error reading JSON: {e}")
+        patient_data = None
+else:
+    patient_data = None
 
 # Radiograph upload
 uploaded_images = st.file_uploader(
@@ -91,7 +59,7 @@ if uploaded_images:
         radiograph_findings.append(finding)
 
 # SOAP generation
-if st.button("Generate SOAP Note"):
+if patient_data and st.button("Generate SOAP Note"):
     soap_note = generate_soap_note(patient_data, radiograph_findings)
     st.subheader("Generated SOAP Note")
     st.text_area("SOAP Note", soap_note, height=400)
