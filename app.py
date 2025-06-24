@@ -4,27 +4,33 @@ import openai
 from PIL import Image
 from generate_soap_note import generate_soap_note
 
-st.title("Dental Note Analyzer – Demo Mode (Mock Data)")
+st.title("Dental Note Analyzer – Full Mock Mode (No DB Required)")
 
-# Mock patient data in place of database connection
+# Expanded mock patient data simulating Open Dental structure
 patient_data = {
     "core_info": {
         "Name": "Jane Doe",
         "DOB": "1992-06-15",
         "Gender": "Female",
-        "Status": "Active"
+        "Status": "Active",
+        "Language": "English",
+        "Race": "White",
+        "BillingType": "PPO"
     },
     "appointments": [
-        {"Date": "2025-06-21", "Type": "Recall", "Provider": "Dr. Smith"},
+        {"Date": "2025-06-21", "Type": "Recall", "Provider": "Dr. Smith", "Status": "Completed"},
+        {"Date": "2025-12-15", "Type": "Restorative", "Provider": "Dr. Smith", "Status": "Scheduled"}
     ],
     "medications": [
-        {"MedName": "Lisinopril", "Notes": "10mg daily"}
+        {"MedName": "Lisinopril", "Notes": "10mg daily"},
+        {"MedName": "Metformin", "Notes": "500mg twice daily"}
     ],
     "allergies": [
-        {"Allergy": "Penicillin"}
+        {"Allergy": "Penicillin", "Reaction": "Rash"}
     ],
     "conditions": [
-        {"Condition": "Hypertension"}
+        {"Condition": "Hypertension"},
+        {"Condition": "Type II Diabetes"}
     ],
     "procedures": [
         {"Code": "D0150", "Tooth": "", "Date": "2025-06-21"},
@@ -33,7 +39,17 @@ patient_data = {
         {"Code": "D2740", "Tooth": "#8", "Date": "2025-06-21"}
     ],
     "notes": [
-        {"Date": "2025-06-21", "Note": "Patient reports sensitivity on lower right molar."}
+        {"Date": "2025-06-21", "Note": "Patient reports sensitivity on lower right molar."},
+        {"Date": "2025-01-10", "Note": "Patient declined fluoride application."}
+    ],
+    "recalls": [
+        {"Type": "Prophy", "DueDate": "2026-06-21", "LastCompleted": "2025-06-21"}
+    ],
+    "referrals": [
+        {"ReferredTo": "Endodontist", "Reason": "Possible RCT on #30", "Date": "2025-06-21"}
+    ],
+    "insurances": [
+        {"Carrier": "Delta Dental", "SubscriberID": "123456789", "GroupNumber": "GRP12345"}
     ]
 }
 
