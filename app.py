@@ -189,3 +189,10 @@ with tab5:
 
         st.subheader("🎥 (Mock) AI-Generated Video Summary")
         st.markdown(video_description)
+
+        if st.button("📄 Download PDF Summary"):
+            from patient_education_consent_pdf import generate_consent_pdf
+            pdf_path = generate_consent_pdf(education, scary_note)
+            st.success("PDF created successfully.")
+            st.download_button(label="⬇️ Download Treatment Options PDF", file_name="Treatment_Options_And_Risks.pdf", mime="application/pdf", data=open(pdf_path, "rb").read())
+
