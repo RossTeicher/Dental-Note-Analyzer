@@ -12,7 +12,7 @@ st.set_page_config(page_title="Dental Note Analyzer", layout="wide")
 st.title("🦷 Dental Note Analyzer – Unified App")
 
 # Main UI with tabs
-tab1, tab2 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator"])
+tab1, tab2, tab3 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant"])
 
 with tab1:
     st.header("Module 1: Smart SOAP Note Generator")
@@ -93,3 +93,48 @@ with tab2:
         result = validate_treatment_plan(chart_data, treatment_plan, odo_data, perio_data, doc_data)
         st.subheader("Validation Results")
         st.text_area("Validation Output", result, height=500)
+
+with tab3:
+    st.header("Module 3: Chairside Diagnostic Assistant")
+
+    chart3 = st.file_uploader("Upload patient chart JSON", type=["json"], key="chart3")
+    chart_data = json.load(chart3) if chart3 else None
+
+    odo3 = st.file_uploader("Upload odontogram JSON", type=["json"], key="odo3")
+    odo_data = json.load(odo3) if odo3 else None
+
+    perio3 = st.file_uploader("Upload perio chart JSON", type=["json"], key="perio3")
+    perio_data = json.load(perio3) if perio3 else None
+
+    docs3 = st.file_uploader("Upload clinical notes or referrals JSON", type=["json"], key="docs3")
+    doc_data = json.load(docs3) if docs3 else []
+
+    xrays3 = st.file_uploader("Upload radiographs (JPG/PNG)", accept_multiple_files=True, type=["jpg", "jpeg", "png"], key="xray3")
+    radiograph_findings = []
+    if xrays3:
+        for img_file in xrays3:
+            image = Image.open(img_file)
+            st.image(image, caption=f"Uploaded: {img_file.name}", use_column_width=True)
+            prompt = """
+            You are a dental radiologist AI. Please analyze this image and summarize the diagnostic findings.
+            """
+            response = openai.ChatCompletion.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {"role": "user", "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_file.getvalue().hex()}"}}
+                    ]}
+                ],
+                max_tokens=800
+            )
+            result = response.choices[0].message["content"]
+            radiograph_findings.append(result)
+            st.markdown(f"**Radiograph Analysis for {img_file.name}:**")
+            st.write(result)
+
+    if chart_data and st.button("Run Chairside Diagnostic Analysis"):
+        from diagnostic_assistant import generate_diagnostic_summary
+        output = generate_diagnostic_summary(chart_data, odo_data, perio_data, doc_data, radiograph_findings)
+        st.subheader("Diagnostic Assistant Output")
+        st.text_area("Tooth-by-Tooth Diagnostic Summary", output, height=500)
