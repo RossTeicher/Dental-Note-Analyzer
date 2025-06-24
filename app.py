@@ -12,7 +12,7 @@ st.set_page_config(page_title="Dental Note Analyzer", layout="wide")
 st.title("🦷 Dental Note Analyzer – Unified App")
 
 # Main UI with tabs
-tab1, tab2, tab3, tab4 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant", "📸 Radiograph Time-Series Analyzer"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant", "📸 Radiograph Time-Series Analyzer", "📄 Patient Education & Consent"])
 
 with tab1:
     st.header("Module 1: Smart SOAP Note Generator")
@@ -162,3 +162,30 @@ with tab4:
         summary = compare_radiographs(labeled_images)
         st.subheader("Radiographic Comparison Summary")
         st.text_area("Radiologist-style Report", summary, height=500)
+
+with tab5:
+    st.header("Module 5: Smart Patient Education & Consent Generator")
+
+    chart5 = st.file_uploader("Upload patient chart JSON", type=["json"], key="chart5")
+    chart_data = json.load(chart5) if chart5 else None
+
+    plan5 = st.file_uploader("Upload treatment plan JSON", type=["json"], key="plan5")
+    treatment_plan = json.load(plan5) if plan5 else None
+
+    language = st.selectbox("Select Language for Output", ["English", "Spanish", "Russian", "Haitian Creole"], key="lang5")
+
+    if chart_data and treatment_plan and st.button("🧾 Generate Patient Education + Consent"):
+        from patient_education_consent import generate_patient_consent_package
+        consent, scary_note, education, video_description = generate_patient_consent_package(chart_data, treatment_plan, language)
+
+        st.subheader("📝 Consent Form")
+        st.text_area("Consent Text", consent, height=250)
+
+        st.subheader("⚠️ Scary Note")
+        st.text_area("Layman's Risk Explanation", scary_note, height=180)
+
+        st.subheader("📘 Patient Education")
+        st.text_area("Simple Summary of Why This Matters", education, height=180)
+
+        st.subheader("🎥 (Mock) AI-Generated Video Summary")
+        st.markdown(video_description)
