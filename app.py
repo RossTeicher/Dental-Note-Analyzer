@@ -5,27 +5,50 @@ import json
 from PIL import Image
 from generate_soap_note import generate_soap_note
 
-st.title("Dental Note Analyzer – Mock Mode (JSON Upload + Radiographs)")
+st.title("Dental Note Analyzer – Mock Mode (Chart + Perio + Odontogram + Radiographs)")
 
-# Option to upload a JSON file simulating patient data
-uploaded_json = st.file_uploader("Upload a patient JSON file", type=["json"])
-
-if uploaded_json:
+# Upload patient chart
+uploaded_chart = st.file_uploader("Upload patient JSON chart", type=["json"])
+if uploaded_chart:
     try:
-        patient_data = json.load(uploaded_json)
-        st.success("Patient chart JSON uploaded successfully.")
+        patient_data = json.load(uploaded_chart)
+        st.success("Patient chart uploaded.")
         st.json(patient_data)
     except Exception as e:
-        st.error(f"Error reading JSON: {e}")
+        st.error(f"Error parsing chart JSON: {e}")
         patient_data = None
 else:
     patient_data = None
 
-# Radiograph upload
+# Upload perio chart
+uploaded_perio = st.file_uploader("Upload perio chart JSON", type=["json"])
+if uploaded_perio:
+    try:
+        perio_data = json.load(uploaded_perio)
+        st.success("Perio chart uploaded.")
+        st.json(perio_data)
+    except Exception as e:
+        st.error(f"Error parsing perio chart JSON: {e}")
+        perio_data = None
+else:
+    perio_data = None
+
+# Upload odontogram
+uploaded_odo = st.file_uploader("Upload odontogram JSON", type=["json"])
+if uploaded_odo:
+    try:
+        odontogram_data = json.load(uploaded_odo)
+        st.success("Odontogram uploaded.")
+        st.json(odontogram_data)
+    except Exception as e:
+        st.error(f"Error parsing odontogram JSON: {e}")
+        odontogram_data = None
+else:
+    odontogram_data = None
+
+# Upload radiographs
 uploaded_images = st.file_uploader(
-    "Upload today's radiographs (JPG/PNG only)",
-    accept_multiple_files=True,
-    type=["jpg", "jpeg", "png"]
+    "Upload radiographs (JPG/PNG)", accept_multiple_files=True, type=["jpg", "jpeg", "png"]
 )
 
 radiograph_findings = []
@@ -58,8 +81,8 @@ if uploaded_images:
         st.write(finding)
         radiograph_findings.append(finding)
 
-# SOAP generation
+# SOAP Generation
 if patient_data and st.button("Generate SOAP Note"):
-    soap_note = generate_soap_note(patient_data, radiograph_findings)
+    soap_note = generate_soap_note(patient_data, radiograph_findings, perio_data, odontogram_data)
     st.subheader("Generated SOAP Note")
     st.text_area("SOAP Note", soap_note, height=400)

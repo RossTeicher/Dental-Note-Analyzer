@@ -1,32 +1,28 @@
 
 import openai
 
-def generate_soap_note(patient_data, radiograph_findings):
+def generate_soap_note(patient_data, radiograph_findings, perio_data=None, odontogram_data=None):
+    today_summary = ""
+    completed_today = patient_data.get("procedures", [])
+
     cdt_code_map = {
-        "D0150": "Comprehensive oral evaluation - new or established patient",
+        "D0150": "Comprehensive oral evaluation",
         "D1110": "Prophylaxis - adult",
         "D2392": "Resin-based composite - two surfaces, posterior",
         "D2740": "Crown - porcelain/ceramic substrate",
-        "D3310": "Endodontic therapy, anterior tooth (excluding final restoration)"
+        "D3310": "Endodontic therapy, anterior tooth"
     }
 
-    today_summary = ""
-    completed_today = [
-        {"code": "D0150", "tooth": ""},
-        {"code": "D1110", "tooth": ""},
-        {"code": "D2392", "tooth": "#30"},
-        {"code": "D2740", "tooth": "#8"},
-    ]
-
     for proc in completed_today:
-        desc = cdt_code_map.get(proc["code"], "Unknown procedure")
-        tooth = proc.get("tooth", "")
-        today_summary += f"- {desc} ({proc['code']}) on {tooth if tooth else 'unspecified tooth'}\n"
+        code = proc.get("Code", "")
+        desc = cdt_code_map.get(code, "Unknown procedure")
+        tooth = proc.get("Tooth", "")
+        today_summary += f"- {desc} ({code}) on {tooth if tooth else 'unspecified'}\n"
 
     findings_summary = "\n".join(radiograph_findings)
 
     prompt = f"""
-    Generate a legally formatted SOAP note based on the following:
+    You are a clinical documentation assistant. Based on the following patient chart and diagnostics, write a formal, legally precise SOAP note.
 
     PATIENT DATA:
     {patient_data}
@@ -37,7 +33,13 @@ def generate_soap_note(patient_data, radiograph_findings):
     RADIOGRAPH FINDINGS:
     {findings_summary}
 
-    Include subjective complaints, objective chart findings, assessment, and a treatment plan. Be precise, formal, and comprehensive.
+    PERIO CHART:
+    {perio_data}
+
+    ODONTOGRAM:
+    {odontogram_data}
+
+    Format the note with Subjective, Objective, Assessment, and Plan sections. Summarize today's treatment, prior history, periodontal and restorative condition, and radiographic findings. Be precise and medically formal.
     """
 
     response = openai.ChatCompletion.create(
