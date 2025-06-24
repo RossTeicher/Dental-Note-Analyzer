@@ -12,7 +12,7 @@ st.set_page_config(page_title="Dental Note Analyzer", layout="wide")
 st.title("🦷 Dental Note Analyzer – Unified App")
 
 # Main UI with tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant", "📸 Radiograph Time-Series Analyzer", "📄 Patient Education & Consent"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📝 SOAP Note Generator", "📋 Treatment Plan Validator", "🧠 Chairside Diagnostic Assistant", "📸 Radiograph Time-Series Analyzer", "📄 Patient Education & Consent", "🛡️ Compliance Auditor"])
 
 with tab1:
     st.header("Module 1: Smart SOAP Note Generator")
@@ -196,3 +196,19 @@ with tab5:
             st.success("PDF created successfully.")
             st.download_button(label="⬇️ Download Treatment Options PDF", file_name="Treatment_Options_And_Risks.pdf", mime="application/pdf", data=open(pdf_path, "rb").read())
 
+
+with tab6:
+    st.header("Module 6: Legal & Insurance Compliance Auditor")
+
+    soap_upload = st.file_uploader("Upload SOAP Note (text or .txt file)", type=["txt"], key="soap6")
+    plan_upload = st.file_uploader("Upload Treatment Plan JSON", type=["json"], key="plan6")
+
+    soap_text = soap_upload.read().decode("utf-8") if soap_upload else ""
+    treatment_plan_data = json.load(plan_upload) if plan_upload else None
+
+    if soap_text and treatment_plan_data and st.button("🔍 Run Compliance Audit"):
+        from compliance_auditor import audit_compliance
+        compliance_report = audit_compliance(soap_text, treatment_plan_data)
+
+        st.subheader("📋 Compliance Audit Report")
+        st.text_area("Audit Summary", compliance_report, height=400)
