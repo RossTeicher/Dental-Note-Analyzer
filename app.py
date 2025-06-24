@@ -1,5 +1,5 @@
+import streamlit as st
 
-if 'app_loaded' not in st.session_state:
     st.session_state['app_loaded'] = True
 with st.sidebar:
     if st.button("🚀 Auto Run All Modules"):
@@ -259,4 +259,3 @@ with tab6:
             st.session_state["compliance_summary"]
         )
         st.download_button(label="⬇️ Download Full Audit Packet PDF", file_name="Full_Audit_Packet.pdf", mime="application/pdf", data=open(audit_pdf_path, "rb").read())
-
