@@ -1,5 +1,0 @@
-streamlit
-openai
-pillow
-mysql-connector-python
-PyMuPDF
