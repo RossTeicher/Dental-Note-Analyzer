@@ -3,14 +3,14 @@ import streamlit as st
 from PIL import Image
 import base64
 import os
-st.set_page_config(page_title="ToothWise – AI Dental Assistant", page_icon="🧠")
+st.set_page_config(page_title="BrightBite – AI Dental Assistant", page_icon="🧠")
 
 # Load logo
-if "toothwise_logo.png" in os.listdir():
-    logo = Image.open("toothwise_logo.png")
+if "brightbite_logo.png" in os.listdir():
+    logo = Image.open("brightbite_logo.png")
     st.image(logo, width=160)
 
-st.title("ToothWise")
+st.title("BrightBite")
 st.subheader("AI That Talks Smart. So You Don’t Have To.")
 
 # Tabbed interface
@@ -18,9 +18,9 @@ tab = st.sidebar.radio("Navigate", ["Home", "App", "Demo Packet"])
 
 if tab == "Home":
     st.markdown("""
-### 🦷 Meet ToothWise
+### 🦷 Meet BrightBite
 
-ToothWise is your AI-powered dental assistant, automating:
+BrightBite is your AI-powered dental assistant, automating:
 - 📝 SOAP Notes
 - 📷 Radiograph Interpretation
 - 📊 Treatment Plan Validation
