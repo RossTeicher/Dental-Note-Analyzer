@@ -168,18 +168,25 @@ with tab5:
 
     chart5 = st.file_uploader("Upload patient chart JSON", type=["json"], key="chart5")
     chart_data = json.load(chart5) if chart5 else None
+    if chart_data: st.session_state["chart_data"] = chart_data
 
     plan5 = st.file_uploader("Upload treatment plan JSON", type=["json"], key="plan5")
     treatment_plan = json.load(plan5) if plan5 else None
+    if treatment_plan: st.session_state["treatment_plan"] = treatment_plan
 
     language = st.selectbox("Select Language for Output", ["English", "Spanish", "Russian", "Haitian Creole"], key="lang5")
 
     if chart_data and treatment_plan and st.button("🧾 Generate Patient Education + Consent"):
         from patient_education_consent import generate_patient_consent_package
         consent, scary_note, education, video_description = generate_patient_consent_package(chart_data, treatment_plan, language)
+        st.session_state["consent"] = consent
+        st.session_state["scary_note"] = scary_note
+        st.session_state["education"] = education
+        st.session_state["video_description"] = video_description
 
         st.subheader("📝 Consent Form")
         st.text_area("Consent Text", consent, height=250)
+        st.session_state["soap_note"] = st.session_state.get("soap_note", "")
 
         st.subheader("⚠️ Scary Note")
         st.text_area("Layman's Risk Explanation", scary_note, height=180)
@@ -203,10 +210,10 @@ with tab6:
     soap_upload = st.file_uploader("Upload SOAP Note (text or .txt file)", type=["txt"], key="soap6")
     plan_upload = st.file_uploader("Upload Treatment Plan JSON", type=["json"], key="plan6")
 
-    soap_text = soap_upload.read().decode("utf-8") if soap_upload else ""
-    treatment_plan_data = json.load(plan_upload) if plan_upload else None
+    soap_text = soap_upload.read().decode("utf-8") if soap_upload else st.session_state.get("soap_note", "")
+    treatment_plan_data = json.load(plan_upload) if plan_upload else st.session_state.get("treatment_plan")
 
-    if soap_text and treatment_plan_data and st.button("🔍 Run Compliance Audit"):
+    if st.button("🔍 Run Full Compliance Audit") and soap_text and treatment_plan_data and "scary_note" in st.session_state and "education" in st.session_state:
         from compliance_auditor import audit_compliance
         compliance_report = audit_compliance(soap_text, treatment_plan_data)
 
