@@ -6,6 +6,26 @@ import fitz  # PyMuPDF
 import os
 import base64
 
+
+def deidentify(text):
+    """Replace PHI with placeholders and track what to restore later."""
+    replacements = {}
+    # Very basic example; real use would use regex, NLP, or spaCy
+    if "John Smith" in text:
+        replacements["Patient A"] = "John Smith"
+        text = text.replace("John Smith", "Patient A")
+    if "01/01/1980" in text:
+        replacements["[DOB]"] = "01/01/1980"
+        text = text.replace("01/01/1980", "[DOB]")
+    return text, replacements
+
+def reidentify(text, replacements):
+    """Restore real PHI after GPT processing."""
+    for fake, real in replacements.items():
+        text = text.replace(fake, real)
+    return text
+
+
 st.set_page_config(page_title="BrightBite - Dental Note Analyzer", layout="wide")
 st.title("🧠🦷 BrightBite - Dental Note Analyzer")
 
@@ -24,7 +44,19 @@ with tabs[0]:
     obj = st.text_area("Objective (Findings, Meds, Allergies)", key="soap_obj")
     assess = st.text_area("Assessment", key="soap_assess")
     plan = st.text_area("Plan", key="soap_plan")
+    
+    deid_enabled = st.checkbox("Auto-Deidentify PHI Before GPT", key="deid_toggle")
     if st.button("Generate SOAP Note", key="soap_button"):
+        note = f"""S: {subj}
+O: {obj}
+A: {assess}
+P: {plan}"""
+        if deid_enabled:
+            deid_note, replacements = deidentify(note)
+            # Here you would call GPT on deid_note if needed
+            note = reidentify(deid_note, replacements)
+        st.text_area("Generated SOAP Note", value=note, height=300, key="soap_result")
+
         soap = f"""S: {subj}
 O: {obj}
 A: {assess}
