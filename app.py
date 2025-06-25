@@ -4,6 +4,7 @@ from openai import OpenAI
 from PIL import Image
 import fitz  # PyMuPDF
 import os
+import base64
 
 st.set_page_config(page_title="BrightBite - Dental Note Analyzer", layout="wide")
 st.title("🧠🦷 BrightBite - Dental Note Analyzer")
@@ -11,88 +12,113 @@ st.title("🧠🦷 BrightBite - Dental Note Analyzer")
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 tabs = st.tabs([
-    "SOAP Note Generator", "Radiograph Comparison (GPT Vision)",
-    "PDF/OCR Parser", "Treatment Plan Validator",
-    "Chairside Assistant", "Consent Generator", "Compliance Auditor"
+    "SOAP Note Generator", "Radiograph Analyzer (GPT-4 Vision)",
+    "PDF Parser", "Treatment Plan Validator",
+    "Consent Generator", "Compliance Auditor"
 ])
 
 with tabs[0]:
     st.header("📋 SOAP Note Generator")
-    pt_name = st.text_input("Patient Name", key="pt_name")
-    history = st.text_area("Medical History", key="med_history")
-    meds = st.text_area("Current Medications", key="meds")
-    allergies = st.text_area("Allergies", key="allergies")
-    findings = st.text_area("Clinical Findings", key="findings")
-    if st.button("Generate SOAP Note", key="gen_soap"):
-        note = f"""S: Patient {pt_name} reports {history}
-O: Medications: {meds}; Allergies: {allergies}
-A: {findings}
-P: Proceed with radiographic evaluation and treatment planning.""" 
-        st.text_area("Generated SOAP Note", value=note, height=300, key="output_soap")
+    name = st.text_input("Patient Name", key="soap_name")
+    subj = st.text_area("Subjective (Chief Complaint, History)", key="soap_subj")
+    obj = st.text_area("Objective (Findings, Meds, Allergies)", key="soap_obj")
+    assess = st.text_area("Assessment", key="soap_assess")
+    plan = st.text_area("Plan", key="soap_plan")
+    if st.button("Generate SOAP Note", key="soap_button"):
+        soap = f"""S: {subj}
+O: {obj}
+A: {assess}
+P: {plan}"""
+        st.text_area("Generated SOAP Note", value=soap, height=300, key="soap_result")
 
 with tabs[1]:
-    st.header("🩻 Radiograph Comparison (GPT Vision)")
-    img1 = st.file_uploader("Upload Previous Radiograph", type=["jpg", "jpeg", "png"], key="img1")
-    img2 = st.file_uploader("Upload Current Radiograph", type=["jpg", "jpeg", "png"], key="img2")
-    if img1 and img2:
-        st.image(Image.open(img1), caption="Previous Radiograph", use_column_width=True)
-        st.image(Image.open(img2), caption="Current Radiograph", use_column_width=True)
-        if st.button("Compare with GPT Vision", key="compare_imgs"):
-            st.info("🧠 GPT-4 Vision would analyze and summarize differences here (stub logic).")
-            st.markdown("**Comparison Result:** Slight bone loss observed in #30 area compared to prior.")
+    st.header("🩻 Radiograph Analyzer (GPT-4 Vision)")
+    col1, col2 = st.columns(2)
+    with col1:
+        old_xray = st.file_uploader("Upload Previous Radiograph", type=["jpg", "jpeg", "png"], key="old_xray")
+    with col2:
+        new_xray = st.file_uploader("Upload Current Radiograph", type=["jpg", "jpeg", "png"], key="new_xray")
+
+    if old_xray and new_xray:
+        st.image(Image.open(old_xray), caption="Previous Radiograph", use_column_width=True)
+        st.image(Image.open(new_xray), caption="Current Radiograph", use_column_width=True)
+
+        if st.button("Analyze Changes with GPT-4 Vision", key="analyze_xray"):
+            images = [
+                {"image": old_xray.getvalue(), "desc": "This is the earlier radiograph."},
+                {"image": new_xray.getvalue(), "desc": "This is the more recent radiograph."}
+            ]
+            messages = [
+                {"role": "system", "content": "You are a dental radiologist. Compare the two images for any radiographic changes."},
+                {"role": "user", "content": "Please compare these two dental radiographs and describe any changes, bone loss, or pathologies."}
+            ]
+            vision_inputs = []
+            for img in images:
+                b64_img = base64.b64encode(img["image"]).decode("utf-8")
+                vision_inputs.append({
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/png;base64,{b64_img}"},
+                })
+                vision_inputs.append({"type": "text", "text": img["desc"]})
+
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4-vision-preview",
+                    messages=[{"role": "user", "content": vision_inputs}],
+                    max_tokens=500
+                )
+                result = response.choices[0].message.content
+                st.markdown("### 🧠 GPT-4 Vision Radiograph Comparison Result")
+                st.markdown(result)
+            except Exception as e:
+                st.error(f"Error analyzing with GPT-4 Vision: {e}")
 
 with tabs[2]:
-    st.header("📄 PDF/OCR Parser")
-    uploaded_pdf = st.file_uploader("Upload PDF Document", type=["pdf"], key="pdf_doc")
+    st.header("📄 PDF Parser")
+    uploaded_pdf = st.file_uploader("Upload PDF Document", type=["pdf"], key="pdf_upload")
     if uploaded_pdf:
         pdf_path = f"temp_{uploaded_pdf.name}"
         with open(pdf_path, "wb") as f:
             f.write(uploaded_pdf.read())
         doc = fitz.open(pdf_path)
-        text_output = ""
+        extracted_text = ""
         for page in doc:
-            text_output += page.get_text()
-        st.text_area("Extracted Text", value=text_output, height=300, key="ocr_output")
+            extracted_text += page.get_text()
+        st.text_area("Extracted Text", value=extracted_text, height=300, key="pdf_output")
         os.remove(pdf_path)
 
 with tabs[3]:
     st.header("🛠️ Treatment Plan Validator")
-    completed_tx = st.text_area("Completed Procedures", key="completed_tx")
-    planned_tx = st.text_area("Planned Treatment", key="planned_tx")
-    if st.button("Validate Plan", key="validate_plan"):
-        if "extraction" in planned_tx.lower() and "crown" in completed_tx.lower():
-            st.warning("⚠️ Check if crown is still viable before extraction.")
+    completed = st.text_area("Completed Procedures", key="completed_procs")
+    planned = st.text_area("Planned Treatment", key="planned_tx")
+    if st.button("Validate Plan", key="validate_plan_btn"):
+        if "extraction" in planned.lower() and "crown" in completed.lower():
+            st.warning("⚠️ Consider verifying viability of crowned teeth before extraction.")
         else:
-            st.success("✅ No conflicting treatments detected.")
+            st.success("✅ No conflicts detected between planned and completed procedures.")
 
 with tabs[4]:
-    st.header("🪥 Chairside Diagnostic Assistant")
-    odonto_notes = st.text_area("Odontogram Findings", key="odonto")
-    perio_status = st.text_area("Perio Chart Summary", key="perio")
-    if st.button("Generate Diagnostic Summary", key="diagnostic_summary"):
-        summary = f"Patient shows: {odonto_notes}. Perio charting indicates: {perio_status}."
-        st.text_area("Diagnostic Summary", value=summary, height=200, key="diag_summary")
+    st.header("📑 Consent Generator")
+    procedure = st.text_input("Procedure", key="consent_proc")
+    language = st.selectbox("Language", ["English", "Spanish", "Russian", "Haitian Creole"], key="consent_lang")
+    if st.button("Generate Consent", key="gen_consent_btn"):
+        consent = f"""
+Consent for {procedure} ({language})
+- Risks: infection, discomfort, failure.
+- Alternatives: doing nothing, other treatment options.
+- All patient questions answered. Patient consents to proceed."""
+        st.text_area("Generated Consent Form", value=consent, height=250, key="consent_output")
 
 with tabs[5]:
-    st.header("📑 Consent Generator")
-    procedure = st.text_input("Procedure", key="procedure")
-    language = st.selectbox("Language", ["English", "Spanish", "Russian", "Haitian Creole"], key="lang")
-    if st.button("Generate Consent Form", key="gen_consent"):
-        st.markdown(f"**Consent Form for {procedure} ({language})**")
-        st.markdown("- Explained risks: infection, discomfort, treatment failure.")
-        st.markdown("- Patient offered alternatives including no treatment.")
-        st.markdown("✅ Patient gave informed consent.")
-
-with tabs[6]:
     st.header("⚖️ Compliance Auditor")
-    note_input = st.text_area("Paste SOAP Note for Audit", key="audit_input")
-    if st.button("Run Compliance Audit", key="run_audit"):
-        flags = []
-        if "risks" not in note_input.lower(): flags.append("Missing risk disclosure")
-        if "alternative" not in note_input.lower(): flags.append("Missing treatment alternatives")
-        if "consent" not in note_input.lower(): flags.append("Missing consent confirmation")
-        if flags:
-            for issue in flags:
+    audit_note = st.text_area("Paste SOAP Note for Audit", key="audit_note")
+    if st.button("Audit Note", key="audit_btn"):
+        issues = []
+        if "risks" not in audit_note.lower(): issues.append("Missing risk disclosure.")
+        if "alternative" not in audit_note.lower(): issues.append("Missing treatment alternatives.")
+        if "consent" not in audit_note.lower(): issues.append("Missing patient consent confirmation.")
+        if issues:
+            for issue in issues:
                 st.error(f"⚠️ {issue}")
         else:
-            st.success("✅ All legal components present.")
+            st.success("✅ All legal elements present in note.")
