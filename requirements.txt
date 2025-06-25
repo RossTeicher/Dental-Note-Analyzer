@@ -1,5 +1,1 @@
 streamlit
-openai
-pillow
-pymupdf
-speechrecognition
