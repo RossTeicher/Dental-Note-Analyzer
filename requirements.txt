@@ -1,5 +1,7 @@
 streamlit
 openai
+pandas
 pillow
 mysql-connector-python
-PyMuPDF
+pymupdf
+python-dotenv
