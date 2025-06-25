@@ -1,1 +1,1 @@
-# BrightBite: AI-Powered Dental Assistant
+# Placeholder for README.md

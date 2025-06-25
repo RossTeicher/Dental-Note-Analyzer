@@ -1,0 +1,1 @@
+# Placeholder for module_1_smart_note_generator.py

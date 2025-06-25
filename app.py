@@ -1,1 +1,1 @@
-# Main app entry point
+# Placeholder for app.py
