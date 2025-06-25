@@ -1,35 +1,59 @@
 
 import streamlit as st
 
-# Page config
-st.set_page_config(page_title="BrightBite Dental Assistant", layout="wide")
+st.set_page_config(page_title="BrightBite", layout="wide")
+st.title("🧠🦷 BrightBite AI Dental Assistant")
 
-# App title and logo
-st.title("🧠🦷 BrightBite: AI Dental Assistant")
-st.markdown("Welcome to the full-stack demo. Upload your files and click below to begin.")
+# Sidebar toggles
+st.sidebar.header("Options")
+deidentify = st.sidebar.checkbox("🔒 De-identify before GPT")
+fullstack_enabled = st.sidebar.checkbox("🤖 Full Stack Automation")
+include_consent = st.sidebar.checkbox("📄 Include Consent Form")
+enable_voice = st.sidebar.checkbox("🎙️ Voice Dictation")
 
-# Toggles
-st.sidebar.header("Modules")
-deidentify_enabled = st.sidebar.checkbox("🔒 De-identify before GPT", value=True)
-fullstack_enabled = st.sidebar.checkbox("⚙️ Full Stack Automation", value=True)
-include_voice = st.sidebar.checkbox("🎤 Voice Dictation", value=False)
+# Tabs for each module
+tabs = st.tabs([
+    "1. Smart Note Generator",
+    "2. AI Treatment Plan Validator",
+    "3. Chairside Diagnostic Assistant",
+    "4. Radiograph Time-Series Analyzer",
+    "5. Smart Consent & Education Generator",
+    "6. Legal & Insurance Compliance Auditor"
+])
 
-# Upload section
-st.subheader("Upload Patient Files")
-xray_files = st.file_uploader("Upload Radiographs", type=["jpg", "png"], accept_multiple_files=True)
-pdf_file = st.file_uploader("Upload PDF Documents", type=["pdf"])
-notes = st.text_area("Optional: Enter Observations or Findings")
+with tabs[0]:
+    st.subheader("📝 Smart Note Generator")
+    st.text_area("Chief Complaint", placeholder="Enter CC here...")
+    st.file_uploader("Upload Radiographs", accept_multiple_files=True)
+    st.button("Generate SOAP Note")
 
-# Automation trigger
+with tabs[1]:
+    st.subheader("📋 AI Treatment Plan Validator")
+    st.text_area("Planned Treatment")
+    st.button("Validate Plan")
+
+with tabs[2]:
+    st.subheader("🧠 Chairside Diagnostic Assistant")
+    st.text_area("Clinical Findings")
+    st.button("Suggest Diagnoses")
+
+with tabs[3]:
+    st.subheader("📸 Radiograph Time-Series Analyzer")
+    st.file_uploader("Upload Previous Radiographs", accept_multiple_files=True)
+    st.file_uploader("Upload Current Radiographs", accept_multiple_files=True)
+    st.button("Compare Radiographs")
+
+with tabs[4]:
+    st.subheader("🗣️ Smart Consent & Education Generator")
+    st.selectbox("Procedure", ["Extraction", "Implant", "Root Canal"])
+    st.text_input("Languages Needed")
+    st.button("Generate Consent Form")
+
+with tabs[5]:
+    st.subheader("⚖️ Legal & Insurance Compliance Auditor")
+    st.text_area("SOAP Note to Audit")
+    st.button("Audit & Edit Note")
+
+# Run automation at the end
 if st.button("▶️ Run Full Stack Automation"):
-    st.success("Processing all selected modules... (placeholder logic)")
-    if fullstack_enabled:
-        st.info("Running radiograph analysis, PDF parsing, risk stratification, and note generation.")
-    if deidentify_enabled:
-        st.info("De-identifying patient data before processing.")
-    if include_voice:
-        st.info("Voice dictation module enabled (not yet implemented).")
-
-# Safety fallback
-st.caption("If nothing appears above, ensure all dependencies are installed and try refreshing.")
-
+    st.success("Full stack automation executed (placeholder).")
