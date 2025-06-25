@@ -128,7 +128,6 @@ if st.button("📝 Generate Full Note"):
         base_note += f"\n\n[Radiograph Summary]\n{xray_summary}"
 
     
-    if fullstack_enabled:
         if radiograph_summary:
             base_note += f"\n\n[Radiograph Findings]\n{radiograph_summary}"
         if pdf_text:
@@ -139,7 +138,6 @@ if st.button("📝 Generate Full Note"):
             consent = f"Consent for {procedure} ({lang})\n- Risks: pain, bleeding, failure\n- Alternatives discussed\n- Patient consented after all questions were answered."
             base_note += f"\n\n[Consent]\n{consent}"
 
-    if auto_legal_insert and "questions answered" not in base_note.lower():
         base_note += "\n\n[Compliance Addendum]\nPatient was informed of all risks, given alternative options, and all questions were answered."
 
 
