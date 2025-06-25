@@ -1,10 +1,1 @@
-# Main app with all modules imported and UI scaffolded
-
-import Module_1_Smart_Note_Generator
-import Module_2_Treatment_Plan_Validator
-import Module_3_Chairside_Diagnostic_Assistant
-import Module_4_Radiograph_TimeSeries_Analyzer
-import Module_5_Smart_Consent_Education
-import Module_6_Compliance_Auditor
-
-# TODO: Streamlit app logic including toggles and Vision integration
+# Main app entry point
