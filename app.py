@@ -94,6 +94,10 @@ with st.expander("🪥 Chairside Diagnostic Assistant"):
         st.markdown("#### Combined Clinical Impression:")
         st.markdown(f"- Odontogram: {odontogram}\n- Perio: {perio}")
 
+# --- Extra Note Toggles ---
+include_consent = st.checkbox("🧾 Include Consent in Plan", value=True)
+include_assistant = st.checkbox("🪥 Include Chairside Assistant Findings", value=True)
+
 # --- Consent Generator ---
 with st.expander("📑 Consent Generator"):
     procedure = st.text_input("Procedure")
@@ -127,6 +131,32 @@ if st.button("📝 Generate Full Note"):
     if xray_summary:
         base_note += f"\n\n[Radiograph Summary]\n{xray_summary}"
 
+    
+    
+    if fullstack_enabled:
+        if radiograph_summary:
+            base_note += f"\n\n[Radiograph Findings]\n{radiograph_summary}"
+        if pdf_text:
+            base_note += f"\n\n[Referral Summary]\n{pdf_text}"
+        if assistant_enabled:
+            base_note += f"\n\n[Chairside Notes]\nPerio: {perio}\nOdontogram: {odontogram}"
+        if procedure and consent_enabled:
+            consent = f"Consent for {procedure} ({lang})\n- Risks: pain, bleeding, failure\n- Alternatives discussed\n- Patient consented after all questions answered."
+            base_note += f"\n\n[Consent]\n{consent}"
+
+
+    if include_assistant:
+        base_note += f"\n\n[Chairside Notes]\nPerio: {perio}\nOdontogram: {odontogram}"
+    if include_consent and procedure:
+        consent = f"Consent for {procedure} ({lang})\n- Risks: pain, bleeding, failure\n- Alternatives discussed\n- Patient consented after all questions answered."
+        base_note += f"\n\n[Consent]\n{consent}"
+
+
+    
+    if auto_legal_insert and "questions answered" not in base_note.lower():
+        base_note += "\n\n[Compliance Addendum]\nPatient was informed of all risks, given alternative options, and all questions were answered."
+
+
     if deid_enabled:
         base_note, replacements = deidentify(base_note)
         st.info("PHI removed before GPT")
@@ -134,7 +164,7 @@ if st.button("📝 Generate Full Note"):
     try:
         result = client.chat.completions.create(
             model="gpt-4",
-            messages=[{"role": "system", "content": "Format this as a formal SOAP note for dental charting."},
+            messages=[{"role": "system", "content": "You are a legal-medical scribe for a dental chart. Expand all available input into a detailed SOAP note formatted for legal and insurance review. Be precise, include full sentences, and restate findings from radiographs, PDFs, and assistant inputs. Break down the treatment plan into detailed bullet points. Include legal phrasing such as 'all patient questions were answered' and 'patient was given the option of doing nothing.'"},
                       {"role": "user", "content": base_note}],
             max_tokens=800
         )
