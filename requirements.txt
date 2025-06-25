@@ -1,6 +1,9 @@
 streamlit
 openai
-pandas
-pillow
 pymupdf
+pandas
+Pillow
 speechrecognition
+altair
+PyMuPDF
+mysql-connector-python
