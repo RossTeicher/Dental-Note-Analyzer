@@ -136,7 +136,7 @@ if st.button("📝 Generate Full Note"):
         if assistant_enabled:
             base_note += f"\n\n[Chairside Notes]\nPerio: {perio}\nOdontogram: {odontogram}"
         if procedure and consent_enabled:
-            consent = f"Consent for {procedure} ({lang})\n- Risks: pain, bleeding, failure\n- Alternatives discussed\n- Patient consented after all questions answered."
+            consent = f"Consent for {procedure} ({lang})\n- Risks: pain, bleeding, failure\n- Alternatives discussed\n- Patient consented after all questions were answered."
             base_note += f"\n\n[Consent]\n{consent}"
 
     if auto_legal_insert and "questions answered" not in base_note.lower():
