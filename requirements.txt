@@ -1,1 +1,13 @@
-# Placeholder for requirements.txt
+streamlit
+openai
+pandas
+numpy
+PyMuPDF
+pdfplumber
+tqdm
+requests
+pydantic
+python-dateutil
+mysql-connector-python
+speechrecognition
+pillow
